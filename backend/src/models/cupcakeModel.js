@@ -1,59 +1,70 @@
 import { query } from '../config/db.js';
 
+export async function listCupcakes({ search, sort = 'nome', order = 'asc', limit = 50, offset = 0 }) {
+  const allowedSort = ['nome', 'preco_cents', 'estoque', 'criado_em'];
+  const sortCol = allowedSort.includes(sort) ? sort : 'nome';
+  const ord = (order || '').toLowerCase() === 'desc' ? 'DESC' : 'ASC';
 
-const sql = `
-SELECT id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em
-FROM cupcakes
-${where}
-ORDER BY ${sortCol} ${ord}
-LIMIT $${params.length - 1} OFFSET $${params.length}
-`;
-const { rows } = await query(sql, params);
-return rows;
+  const params = [];
+  let where = '';
+  if (search) {
+    params.push(`%${search}%`);
+    // usamos a mesma binding para nome e descrição
+    where = `WHERE (LOWER(nome) LIKE LOWER($${params.length}) OR LOWER(descricao) LIKE LOWER($${params.length}))`;
+  }
+  params.push(Number(limit));
+  params.push(Number(offset));
+
+  const sql = `
+    SELECT id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em
+    FROM cupcakes
+    ${where}
+    ORDER BY ${sortCol} ${ord}
+    LIMIT $${params.length - 1} OFFSET $${params.length}
+  `;
+  const { rows } = await query(sql, params);
+  return rows;
 }
-
 
 export async function getCupcakeById(id) {
-const { rows } = await query('SELECT id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em FROM cupcakes WHERE id = $1', [id]);
-return rows[0] || null;
+  const { rows } = await query(
+    'SELECT id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em FROM cupcakes WHERE id = $1',
+    [id]
+  );
+  return rows[0] || null;
 }
-
 
 export async function createCupcake({ nome, descricao = '', preco_cents, estoque = 0, image_url = null }) {
-const { rows } = await query(
-`INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em`,
-[nome, descricao, preco_cents, estoque, image_url]
-);
-return rows[0];
+  const { rows } = await query(
+    `INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em`,
+    [nome, descricao, preco_cents, estoque, image_url]
+  );
+  return rows[0];
 }
-
 
 export async function updateCupcake(id, { nome, descricao, preco_cents, estoque, image_url }) {
-const fields = [];
-const params = [];
-let idx = 1;
+  const fields = [];
+  const params = [];
+  let idx = 1;
 
+  if (nome !== undefined) { fields.push(`nome = $${idx++}`); params.push(nome); }
+  if (descricao !== undefined) { fields.push(`descricao = $${idx++}`); params.push(descricao); }
+  if (preco_cents !== undefined) { fields.push(`preco_cents = $${idx++}`); params.push(preco_cents); }
+  if (estoque !== undefined) { fields.push(`estoque = $${idx++}`); params.push(estoque); }
+  if (image_url !== undefined) { fields.push(`image_url = $${idx++}`); params.push(image_url || null); }
 
-if (nome !== undefined) { fields.push(`nome = $${idx++}`); params.push(nome); }
-if (descricao !== undefined) { fields.push(`descricao = $${idx++}`); params.push(descricao); }
-if (preco_cents !== undefined) { fields.push(`preco_cents = $${idx++}`); params.push(preco_cents); }
-if (estoque !== undefined) { fields.push(`estoque = $${idx++}`); params.push(estoque); }
-if (image_url !== undefined) { fields.push(`image_url = $${idx++}`); params.push(image_url || null); }
+  if (fields.length === 0) return getCupcakeById(id);
 
-
-if (fields.length === 0) return getCupcakeById(id);
-
-
-params.push(id);
-const sql = `UPDATE cupcakes SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em`;
-const { rows } = await query(sql, params);
-return rows[0] || null;
+  params.push(id);
+  const sql = `UPDATE cupcakes SET ${fields.join(', ')} WHERE id = $${idx}
+               RETURNING id, nome, descricao, preco_cents, estoque, image_url, criado_em, atualizado_em`;
+  const { rows } = await query(sql, params);
+  return rows[0] || null;
 }
 
-
 export async function deleteCupcake(id) {
-const { rowCount } = await query('DELETE FROM cupcakes WHERE id = $1', [id]);
-return rowCount > 0;
+  const { rowCount } = await query('DELETE FROM cupcakes WHERE id = $1', [id]);
+  return rowCount > 0;
 }
