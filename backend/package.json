@@ -1,21 +1,23 @@
 {
   "name": "cupcake-api",
   "version": "1.0.0",
-  "description": "API REST - Cupcake Store (CRUD de Cupcakes)",
-  "main": "src/index.js",
   "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "db:setup": "node scripts/run-sql.js scripts/schema.sql"
+    "dev": "node --watch src/index.js",
+    "migrate": "node scripts/run-sql.js scripts/migrations/*.sql",
+    "seed:admin": "node scripts/seed-admin.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "pg": "^8.11.5"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.3"
   }
 }

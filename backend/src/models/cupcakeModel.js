@@ -9,7 +9,6 @@ export async function listCupcakes({ search, sort = 'nome', order = 'asc', limit
   let where = '';
   if (search) {
     params.push(`%${search}%`);
-    // usamos a mesma binding para nome e descrição
     where = `WHERE (LOWER(nome) LIKE LOWER($${params.length}) OR LOWER(descricao) LIKE LOWER($${params.length}))`;
   }
   params.push(Number(limit));

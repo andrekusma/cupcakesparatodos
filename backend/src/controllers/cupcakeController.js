@@ -13,27 +13,19 @@ function parseMoneyToCents(v) {
 }
 
 function sanitizeUrl(u) {
-  if (u === undefined) return undefined; // não tocar se não veio no payload
+  if (u === undefined) return undefined;
   if (u === null || u === '') return null;
   try {
     const url = new URL(String(u));
-    if (!/^https?:$/.test(url.protocol)) return null; // aceita apenas http/https
+    if (!/^https?:$/.test(url.protocol)) return null;
     return url.toString();
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 export async function index(req, res, next) {
   try {
     const { search, sort, order, limit = 50, offset = 0 } = req.query;
-    const items = await listCupcakes({
-      search,
-      sort,
-      order,
-      limit: Number(limit),
-      offset: Number(offset),
-    });
+    const items = await listCupcakes({ search, sort, order, limit: Number(limit), offset: Number(offset) });
     res.json(items);
   } catch (err) { next(err); }
 }
@@ -57,23 +49,14 @@ export async function store(req, res, next) {
     }
 
     const est = Number(estoque);
-    if (isNaN(est) || est < 0) {
-      return res.status(400).json({ message: 'Estoque inválido' });
-    }
+    if (isNaN(est) || est < 0) { return res.status(400).json({ message: 'Estoque inválido' }); }
 
     const img = sanitizeUrl(image_url);
     if (image_url !== undefined && img === null) {
       return res.status(400).json({ message: 'image_url inválida. Use http(s) completo.' });
     }
 
-    const created = await createCupcake({
-      nome,
-      descricao,
-      preco_cents: cents,
-      estoque: est,
-      image_url: img ?? null,
-    });
-
+    const created = await createCupcake({ nome, descricao, preco_cents: cents, estoque: est, image_url: img ?? null });
     res.status(201).json(created);
   } catch (err) { next(err); }
 }

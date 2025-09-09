@@ -1,74 +1,96 @@
 <!DOCTYPE html>
-const adminTable = $('adminTable');
-$('btnAdd').addEventListener('click', onAdd);
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cupcakes Para Todos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+<div id="app" class="p-4 max-w-4xl mx-auto">
+<h1 class="text-3xl font-bold text-center mb-6">Cupcakes Para Todos</h1>
+<div id="loginSection" class="mb-6">
+<input id="email" type="email" placeholder="E-mail" class="p-2 rounded text-black w-full mb-2">
+<input id="password" type="password" placeholder="Senha" class="p-2 rounded text-black w-full mb-2">
+<button id="loginBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full">Entrar</button>
+<p id="loginError" class="text-red-500 mt-2 hidden"></p>
+</div>
+<div id="storeSection" class="hidden">
+<p class="text-green-400 mb-4">Logado como <span id="userEmail"></span></p>
+<div id="cupcakeList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+</div>
+</div>
 
 
-async function onAdd(){
-const nome = $('newNome').value.trim();
-const preco = parseFloat(($('newPreco').value||'0').replace(',','.'));
-const estoque = parseInt($('newEstoque').value||'0');
-const image_url = $('newImg').value.trim();
-if(!nome || isNaN(preco)) return alert('Preencha nome e preço');
-try{
-const created = await apiCreate({ nome, descricao:'', preco_cents: Math.round(preco*100), estoque, image_url });
-$('newNome').value = $('newPreco').value = $('newEstoque').value = $('newImg').value = '';
-await loadList(); renderAdmin();
-}catch(e){ alert('Falha ao adicionar'); console.error(e) }
+<script>
+window.API_BASE = 'https://cupcakesparatodos.onrender.com';
+let token = null;
+
+
+async function login() {
+const email = document.getElementById('email').value.trim();
+const password = document.getElementById('password').value.trim();
+const errorEl = document.getElementById('loginError');
+
+
+if (!email || !password) {
+errorEl.textContent = 'Por favor, preencha e-mail e senha.';
+errorEl.classList.remove('hidden');
+return;
 }
 
 
-function renderAdmin(){
-adminTable.innerHTML = '';
-cupcakes.forEach(c=>{
-const tr = document.createElement('tr');
-tr.innerHTML = `
-<td>#${c.id}</td>
-<td><img src="${imgOrPlaceholder(c.image_url,c.nome)}" class="thumb" style="width:58px;height:58px" onerror="this.src='${placeholder(c.nome)}'"/></td>
-<td><input class="input" value="${escAttr(c.nome)}" onchange="editField(${c.id},'nome',this.value)"/></td>
-<td><input class="input" type="number" step="0.01" value="${(c.preco_cents/100).toFixed(2)}" onchange="editField(${c.id},'preco',this.value)"/></td>
-<td><input class="input" type="number" min="0" value="${c.estoque||0}" onchange="editField(${c.id},'estoque',this.value)"/></td>
-<td class="row" style="gap:8px">
-<input class="input" style="min-width:220px" placeholder="URL imagem (https://...)" value="${escAttr(c.image_url||'')}" onchange="editField(${c.id},'image_url',this.value)"/>
-<button class="btn ok" onclick="saveRow(${c.id})">Salvar</button>
-<button class="btn warn" onclick="delRow(${c.id})">Excluir</button>
-</td>`;
-adminTable.appendChild(tr);
+try {
+const res = await fetch(`${window.API_BASE}/api/auth/login`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ email, password })
 });
+
+
+if (!res.ok) {
+const err = await res.json().catch(() => ({}));
+throw new Error(err.message || 'Falha no login');
 }
 
 
-const edits = new Map();
-function editField(id, field, val){
-const cur = edits.get(id)||{};
-if(field==='preco'){ cur.preco_cents = Math.round(parseFloat(String(val).replace(',','.'))*100)||0; }
-else if(field==='estoque'){ cur.estoque = parseInt(val||'0') }
-else if(field==='image_url'){ cur.image_url = String(val).trim() || null }
-else { cur.nome = val }
-edits.set(id, cur);
+const data = await res.json();
+token = data.token;
+document.getElementById('userEmail').textContent = data.user.email;
+document.getElementById('loginSection').classList.add('hidden');
+document.getElementById('storeSection').classList.remove('hidden');
+await loadCupcakes();
+} catch (err) {
+console.error('Erro no login:', err);
+errorEl.textContent = err.message;
+errorEl.classList.remove('hidden');
 }
-async function saveRow(id){
-try{
-const payload = edits.get(id)||{}; if(Object.keys(payload).length===0) return;
-await apiUpdate(id, payload);
-edits.delete(id);
-await loadList(); renderAdmin();
-}catch(e){ alert('Falha ao salvar'); console.error(e) }
-}
-async function delRow(id){
-if(!confirm('Excluir cupcake #' + id + '?')) return;
-try{ await apiDelete(id); await loadList(); renderAdmin(); }
-catch(e){ alert('Falha ao excluir'); console.error(e) }
 }
 
 
-function esc(s=''){ return String(s).replace(/[&<>]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])) }
-function escAttr(s=''){ return esc(s).replace(/"/g,'&quot;') }
-function placeholder(seed='Cupcake'){ const n=Math.abs(hash(seed))%1000; return `https://picsum.photos/seed/${n}/600/400`; }
-function hash(str){ let h=0; for(let i=0;i<str.length;i++) h=(h<<5)-h+str.charCodeAt(i)|0; return h }
-function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms) } }
+async function loadCupcakes() {
+try {
+const res = await fetch(`${window.API_BASE}/api/cupcakes`);
+const cupcakes = await res.json();
+const list = document.getElementById('cupcakeList');
+list.innerHTML = '';
+cupcakes.forEach(c => {
+const div = document.createElement('div');
+div.className = 'bg-gray-800 rounded shadow p-3';
+div.innerHTML = `
+<img src="${c.image_url || 'https://via.placeholder.com/150'}" class="w-full h-40 object-cover rounded mb-2">
+<h2 class="text-xl font-bold">${c.nome}</h2>
+<p class="text-gray-400">R$ ${(c.preco_cents/100).toFixed(2)}</p>
+`;
+list.appendChild(div);
+});
+} catch (err) {
+console.error('Erro ao carregar cupcakes:', err);
+}
+}
 
 
-(async function(){ await loadList(); renderCart(); renderFavs(); renderHistory(); })();
+document.getElementById('loginBtn').addEventListener('click', login);
 </script>
 </body>
 </html>
