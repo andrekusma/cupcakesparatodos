@@ -13,4 +13,3 @@ cupcakeRouter.post('/', store);
 cupcakeRouter.put('/:id', updateOne);
 // DELETE /api/cupcakes/:id
 cupcakeRouter.delete('/:id', destroy);
-```
