@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Cupcakes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.API_BASE = "https://cupcakesparatodos.onrender.com";
+  </script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-green-700 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-xl font-bold">Painel de Administração</h1>
+      <button id="logoutBtn" class="hover:text-yellow-300">Sair</button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 flex flex-col gap-6">
+    <!-- Form de Novo Cupcake -->
+    <section class="bg-white p-4 rounded-lg shadow">
+      <h2 class="text-lg font-bold mb-2 text-green-700">Adicionar Cupcake</h2>
+      <input id="nome" type="text" placeholder="Nome" class="border p-2 w-full mb-2 rounded">
+      <input id="preco" type="number" step="0.01" placeholder="Preço" class="border p-2 w-full mb-2 rounded">
+      <input id="estoque" type="number" placeholder="Estoque" class="border p-2 w-full mb-2 rounded">
+      <input id="imagem" type="text" placeholder="URL da Imagem" class="border p-2 w-full mb-2 rounded">
+      <button id="addBtn" class="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800">Adicionar</button>
+    </section>
+
+    <!-- Lista de Cupcakes -->
+    <section class="bg-white p-4 rounded-lg shadow">
+      <h2 class="text-lg font-bold mb-3 text-green-700">Cupcakes Cadastrados</h2>
+      <div id="cupcakeTable" class="grid gap-4"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let token = localStorage.getItem('token') || null;
+
+    async function api(path,opt={}) {
+      opt.headers = opt.headers || {};
+      if(token) opt.headers['Authorization'] = 'Bearer '+token;
+      if(opt.body && !(opt.body instanceof FormData)){
+        opt.headers['Content-Type']='application/json';
+        opt.body = JSON.stringify(opt.body);
+      }
+      const res = await fetch(window.API_BASE+path,opt);
+      if(!res.ok) throw new Error((await res.json()).message || 'Erro');
+      return res.json();
+    }
+
+    async function loadCupcakes(){
+      const cupcakes = await api('/api/cupcakes');
+      const table = $('cupcakeTable');
+      table.innerHTML = '';
+      cupcakes.forEach(c=>{
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between border p-3 rounded shadow-sm';
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${c.image_url||'https://via.placeholder.com/80'}" class="w-16 h-16 object-cover rounded">
+            <div>
+              <p class="font-bold">${c.nome}</p>
+              <p class="text-sm text-gray-600">R$ ${(c.preco_cents/100).toFixed(2)}</p>
+              <p class="text-sm">Estoque: ${c.estoque}</p>
+            </div>
+          </div>
+          <button class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" onclick="deleteCupcake(${c.id})">Excluir</button>
+        `;
+        table.appendChild(div);
+      });
+    }
+
+    async function addCupcake(){
+      try{
+        const nome = $('nome').value;
+        const preco = parseFloat($('preco').value)*100;
+        const estoque = parseInt($('estoque').value);
+        const image_url = $('imagem').value;
+        await api('/api/admin/cupcakes',{method:'POST',body:{nome,preco_cents:preco,estoque,image_url}});
+        await loadCupcakes();
+        $('nome').value=$('preco').value=$('estoque').value=$('imagem').value='';
+      }catch(e){ alert(e.message); }
+    }
+
+    async function deleteCupcake(id){
+      if(!confirm('Tem certeza que deseja excluir?')) return;
+      try{
+        await api('/api/admin/cupcakes/'+id,{method:'DELETE'});
+        await loadCupcakes();
+      }catch(e){ alert(e.message); }
+    }
+
+    $('addBtn').onclick = addCupcake;
+    $('logoutBtn').onclick = ()=>{ localStorage.removeItem('token'); window.location.href = 'index.html'; };
+
+    loadCupcakes();
+  </script>
+</body>
+</html>

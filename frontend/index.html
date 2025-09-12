@@ -1,96 +1,133 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cupcakes Para Todos</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cupcakes Para Todos 🇧🇷</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.API_BASE = "https://cupcakesparatodos.onrender.com";
+  </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-<div id="app" class="p-4 max-w-4xl mx-auto">
-<h1 class="text-3xl font-bold text-center mb-6">Cupcakes Para Todos</h1>
-<div id="loginSection" class="mb-6">
-<input id="email" type="email" placeholder="E-mail" class="p-2 rounded text-black w-full mb-2">
-<input id="password" type="password" placeholder="Senha" class="p-2 rounded text-black w-full mb-2">
-<button id="loginBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded w-full">Entrar</button>
-<p id="loginError" class="text-red-500 mt-2 hidden"></p>
-</div>
-<div id="storeSection" class="hidden">
-<p class="text-green-400 mb-4">Logado como <span id="userEmail"></span></p>
-<div id="cupcakeList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-</div>
-</div>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
+  <!-- Navbar -->
+  <header class="bg-green-700 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-2xl font-bold">🇧🇷 Cupcakes para Todos</h1>
+      <nav class="flex gap-4">
+        <button id="btnLogin" class="hover:text-yellow-300">Entrar</button>
+        <button id="btnRegister" class="hover:text-yellow-300">Cadastrar</button>
+        <button id="btnCart" class="relative">
+          🛒
+          <span id="cartCount" class="absolute -top-2 -right-2 bg-yellow-400 text-xs rounded-full px-2">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
 
-<script>
-window.API_BASE = 'https://cupcakesparatodos.onrender.com';
-let token = null;
+  <!-- Loja -->
+  <main class="flex-grow max-w-6xl mx-auto p-4">
+    <h2 class="text-2xl font-bold mb-4 text-green-700">Cupcakes Disponíveis</h2>
+    <div id="cupcakeList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </main>
 
+  <!-- Modal Login -->
+  <div id="modalAuth" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 w-80">
+      <h3 class="text-xl font-bold mb-3 text-center">Login</h3>
+      <input id="loginEmail" type="email" placeholder="E-mail" class="w-full border p-2 mb-2 rounded">
+      <input id="loginPass" type="password" placeholder="Senha" class="w-full border p-2 mb-3 rounded">
+      <button id="doLogin" class="bg-green-700 text-white w-full px-3 py-2 rounded mb-2 hover:bg-green-800">Entrar</button>
+      <button id="closeModal" class="w-full px-3 py-2 rounded border">Cancelar</button>
+      <p id="loginErr" class="text-red-600 text-sm mt-2 hidden"></p>
+    </div>
+  </div>
 
-async function login() {
-const email = document.getElementById('email').value.trim();
-const password = document.getElementById('password').value.trim();
-const errorEl = document.getElementById('loginError');
+  <!-- Carrinho -->
+  <div id="modalCart" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 w-[400px] max-h-[80vh] overflow-y-auto">
+      <h3 class="text-xl font-bold mb-3">Seu Carrinho</h3>
+      <div id="cartItems" class="space-y-2 mb-4"></div>
+      <div class="flex justify-between font-bold mb-3">
+        <span>Total:</span>
+        <span id="cartTotal" class="text-green-700">R$ 0,00</span>
+      </div>
+      <button id="checkoutBtn" class="bg-blue-600 text-white w-full px-3 py-2 rounded mb-2 hover:bg-blue-700">Finalizar Compra</button>
+      <button id="closeCart" class="w-full px-3 py-2 rounded border">Fechar</button>
+    </div>
+  </div>
 
+  <script>
+    const $ = id => document.getElementById(id);
+    let cart = [], token=null, user=null;
 
-if (!email || !password) {
-errorEl.textContent = 'Por favor, preencha e-mail e senha.';
-errorEl.classList.remove('hidden');
-return;
-}
+    async function api(path,opt={}) {
+      opt.headers = opt.headers || {};
+      if(token) opt.headers['Authorization'] = 'Bearer '+token;
+      if(opt.body && !(opt.body instanceof FormData)){
+        opt.headers['Content-Type']='application/json';
+        opt.body = JSON.stringify(opt.body);
+      }
+      const res = await fetch(window.API_BASE+path,opt);
+      if(!res.ok) throw new Error((await res.json()).message || 'Erro');
+      return res.json();
+    }
 
+    async function loadCupcakes(){
+      try{
+        const cupcakes = await api('/api/cupcakes');
+        const list = $('cupcakeList');
+        list.innerHTML = '';
+        cupcakes.forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-lg shadow p-4 flex flex-col';
+          card.innerHTML = `
+            <img src="${c.image_url||'https://via.placeholder.com/300x200'}" class="rounded mb-3">
+            <h3 class="text-lg font-bold text-green-700">${c.nome}</h3>
+            <p class="text-yellow-600 font-semibold">R$ ${(c.preco_cents/100).toFixed(2)}</p>
+            <button class="bg-blue-600 text-white px-3 py-1 mt-2 rounded hover:bg-blue-700" onclick="addToCart(${c.id},'${c.nome}',${c.preco_cents})">Adicionar ao Carrinho</button>
+          `;
+          list.appendChild(card);
+        });
+      }catch(e){ console.error('Erro ao carregar cupcakes',e); }
+    }
 
-try {
-const res = await fetch(`${window.API_BASE}/api/auth/login`, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ email, password })
-});
+    function addToCart(id,nome,preco){
+      cart.push({id,nome,preco});
+      $('cartCount').textContent = cart.length;
+    }
 
+    $('btnCart').onclick=()=>{$('modalCart').classList.remove('hidden');renderCart();}
+    $('closeCart').onclick=()=>$('modalCart').classList.add('hidden');
+    $('btnLogin').onclick=()=>$('modalAuth').classList.remove('hidden');
+    $('closeModal').onclick=()=>$('modalAuth').classList.add('hidden');
 
-if (!res.ok) {
-const err = await res.json().catch(() => ({}));
-throw new Error(err.message || 'Falha no login');
-}
+    $('doLogin').onclick=async()=>{
+      try{
+        const data=await api('/api/auth/login',{method:'POST',body:{email:$('loginEmail').value,password:$('loginPass').value}});
+        token=data.token; user=data.user;
+        $('modalAuth').classList.add('hidden');
+        alert(`Bem-vindo, ${user.email}`);
+      }catch(e){
+        $('loginErr').textContent=e.message;
+        $('loginErr').classList.remove('hidden');
+      }
+    };
 
+    function renderCart(){
+      const list=$('cartItems'); list.innerHTML=''; let total=0;
+      cart.forEach(item=>{
+        total+=item.preco;
+        const div=document.createElement('div');
+        div.className='flex justify-between';
+        div.innerHTML=`<span>${item.nome}</span><span>R$ ${(item.preco/100).toFixed(2)}</span>`;
+        list.appendChild(div);
+      });
+      $('cartTotal').textContent='R$ '+(total/100).toFixed(2);
+    }
 
-const data = await res.json();
-token = data.token;
-document.getElementById('userEmail').textContent = data.user.email;
-document.getElementById('loginSection').classList.add('hidden');
-document.getElementById('storeSection').classList.remove('hidden');
-await loadCupcakes();
-} catch (err) {
-console.error('Erro no login:', err);
-errorEl.textContent = err.message;
-errorEl.classList.remove('hidden');
-}
-}
-
-
-async function loadCupcakes() {
-try {
-const res = await fetch(`${window.API_BASE}/api/cupcakes`);
-const cupcakes = await res.json();
-const list = document.getElementById('cupcakeList');
-list.innerHTML = '';
-cupcakes.forEach(c => {
-const div = document.createElement('div');
-div.className = 'bg-gray-800 rounded shadow p-3';
-div.innerHTML = `
-<img src="${c.image_url || 'https://via.placeholder.com/150'}" class="w-full h-40 object-cover rounded mb-2">
-<h2 class="text-xl font-bold">${c.nome}</h2>
-<p class="text-gray-400">R$ ${(c.preco_cents/100).toFixed(2)}</p>
-`;
-list.appendChild(div);
-});
-} catch (err) {
-console.error('Erro ao carregar cupcakes:', err);
-}
-}
-
-
-document.getElementById('loginBtn').addEventListener('click', login);
-</script>
+    loadCupcakes();
+  </script>
 </body>
 </html>
