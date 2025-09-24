@@ -1,17 +1,25 @@
-import { Router } from 'express';
-import multer from 'multer';
-import { withAuth, requireRole } from '../middleware/auth.js';
-import { store, updateOne, destroy } from '../controllers/cupcakeController.js';
-import { uploadImage } from '../controllers/uploadController.js';
+// backend/src/routes/adminRoutes.js
+import express from 'express';
+import {
+  createCupcake,
+  updateCupcake,
+  deleteCupcake
+} from '../controllers/cupcakeController.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
-const upload = multer({ storage: multer.memoryStorage(), limits:{ fileSize: 5 * 1024 * 1024 } });
+const router = express.Router();
+import { upload } from '../middleware/upload.js';
 
-export const adminRouter = Router();
+// Todas as rotas de admin exigem autenticação
+router.use(requireAuth);
 
-// CRUD cupcakes (apenas admin)
-adminRouter.post('/cupcakes', withAuth, requireRole('admin'), store);
-adminRouter.put('/cupcakes/:id', withAuth, requireRole('admin'), updateOne);
-adminRouter.delete('/cupcakes/:id', withAuth, requireRole('admin'), destroy);
+// Criar cupcake
+router.post('/cupcakes', requireAdmin, upload.single('image'), createCupcake);
 
-// Upload de imagem (retorna { url }) - requer Cloudinary configurado
-adminRouter.post('/upload', withAuth, requireRole('admin'), upload.single('image'), uploadImage);
+// Atualizar cupcake
+router.put('/cupcakes/:id', requireAdmin, updateCupcake);
+
+// Excluir cupcake
+router.delete('/cupcakes/:id', requireAdmin, deleteCupcake);
+
+export { router as adminRouter };

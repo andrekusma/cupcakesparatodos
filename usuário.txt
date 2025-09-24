@@ -1,0 +1,5 @@
+ADMIN_EMAIL=admin@cupcakes.com
+ADMIN_PASSWORD=admin123
+
+ADMIN_EMAIL=teste@teste.com
+ADMIN_PASSWORD=teste

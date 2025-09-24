@@ -1,133 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cupcakes Para Todos 🇧🇷</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cupcakes para Todos</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    window.API_BASE = "https://cupcakesparatodos.onrender.com";
-  </script>
+  <style>
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 1rem;border-radius:.75rem;font-weight:600;cursor:pointer;transition:all .15s ease;user-select:none;box-shadow:0 2px 8px rgba(16,24,40,.08);border:1px solid transparent}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-primary{background:#e84f96;color:#fff;border-color:#e84f96}
+    .btn-primary:hover{background:#d4317d;border-color:#d4317d;transform:translateY(-1px)}
+    .btn-secondary{background:#fff;color:#111827;border-color:#e5e7eb}
+    .btn-secondary:hover{background:#f9fafb}
+    .btn-danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+    .btn-danger:hover{background:#fecaca}
+    .field{width:100%;border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem .75rem;font-size:.9rem;background:#fff;outline:none}
+    .field:focus{border-color:#e84f96;box-shadow:0 0 0 3px rgba(232,79,150,.15)}
+    .glass{background:rgba(255,255,255,.8);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(16,24,40,.06)}
+    .card{border:1px solid #e5e7eb;background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(16,24,40,.06);overflow:hidden}
+    .chip{display:inline-flex;align-items:center;gap:.25rem;background:#e7f5ef;color:#136f4e;font-weight:700;font-size:.7rem;border-radius:999px;padding:.25rem .5rem}
+    .skeleton{background:linear-gradient(90deg,#f6f7f8 0%,#edeef1 50%,#f6f7f8 100%);background-size:200% 100%;animation:shine 1.2s infinite}
+    @keyframes shine{to{background-position:-200% 0}}
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
 
-  <!-- Navbar -->
-  <header class="bg-green-700 text-white shadow-md">
-    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-      <h1 class="text-2xl font-bold">🇧🇷 Cupcakes para Todos</h1>
-      <nav class="flex gap-4">
-        <button id="btnLogin" class="hover:text-yellow-300">Entrar</button>
-        <button id="btnRegister" class="hover:text-yellow-300">Cadastrar</button>
-        <button id="btnCart" class="relative">
-          🛒
-          <span id="cartCount" class="absolute -top-2 -right-2 bg-yellow-400 text-xs rounded-full px-2">0</span>
+  <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="160" height="48" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg" aria-label="CPT • Cupcakes para Todos" class="drop-shadow">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fbcfe8"/>
+              <stop offset="100%" stop-color="#f472b6"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fde68a"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 62 L38 30 L86 30 L104 62 Z" fill="url(#g2)" stroke="#b45309" stroke-width="2"/>
+          <path d="M38 30 C44 12, 80 12, 86 30 Q64 42 38 30 Z" fill="url(#g1)" stroke="#be185d" stroke-width="2"/>
+          <circle cx="56" cy="22" r="2" fill="#fff"/>
+          <circle cx="70" cy="18" r="2" fill="#fff"/>
+          <circle cx="64" cy="26" r="2" fill="#fff"/>
+          <text x="120" y="50" font-size="34" font-weight="800" fill="#111827">CPT</text>
+        </svg>
+        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
+      </div>
+      <nav class="flex items-center gap-2">
+        <button id="btnCart" class="btn btn-secondary hidden relative" aria-label="Carrinho">
+          <span>🛒 Carrinho</span>
+          <span id="cartBadge" class="absolute -top-2 -right-2 text-xs bg-pink-600 text-white rounded-full px-2 py-0.5 hidden">0</span>
         </button>
+        <button id="openSettings" class="btn btn-secondary hidden" title="Configurar API">Configurações</button>
+        <button id="openRegister" class="btn btn-secondary">Cadastrar</button>
+        <button id="openAuth" class="btn btn-primary">Entrar</button>
+        <button id="btnLogout" class="btn btn-secondary hidden">Sair</button>
       </nav>
     </div>
   </header>
 
-  <!-- Loja -->
-  <main class="flex-grow max-w-6xl mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4 text-green-700">Cupcakes Disponíveis</h2>
-    <div id="cupcakeList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  <section class="max-w-6xl mx-auto px-4 mt-6">
+    <div class="glass rounded-2xl p-5">
+      <div class="flex flex-col md:flex-row md:items-end gap-3">
+        <div class="flex-1">
+          <label class="text-sm font-medium text-gray-700" for="search">Buscar cupcakes</label>
+          <input id="search" class="field" placeholder="Ex.: Chocolate, Red Velvet, Baunilha…" />
+        </div>
+        <div class="flex gap-2">
+          <button id="btnClear" class="btn btn-secondary">Limpar</button>
+          <button id="btnRefresh" class="btn btn-primary">Atualizar lista</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 grid gap-6 md:grid-cols-3">
+    <section class="md:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xl font-bold">Catálogo</h2>
+        <span id="countChip" class="chip">0 itens</span>
+      </div>
+      <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-live="polite"></div>
+      <p id="empty" class="hidden text-center text-gray-500 py-8">Nenhum cupcake encontrado.</p>
+    </section>
+
+    <aside id="adminPanel" class="card p-5 h-fit hidden">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-lg font-bold">Área administrativa</h3>
+        <span class="chip">Admin</span>
+      </div>
+      <p class="text-sm text-gray-600 mb-3">Cadastro com imagem PNG/JPEG. Campo do upload: <b>image</b>.</p>
+      <form id="formCreate" class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="name">Nome</label>
+          <input id="name" class="field" required placeholder="Ex.: Red Velvet" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="description">Descrição</label>
+          <textarea id="description" class="field" required placeholder="Breve descrição"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm font-medium text-gray-700" for="price">Preço (R$)</label>
+            <input id="price" type="number" step="0.01" min="0" class="field" required />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-700" for="stock">Estoque</label>
+            <input id="stock" type="number" step="1" min="0" class="field" value="0" />
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="image">Imagem (PNG/JPEG)</label>
+          <div id="drop" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition">
+            <p class="text-sm text-gray-600">Arraste a imagem aqui ou clique para selecionar</p>
+            <input id="image" type="file" accept="image/png,image/jpeg" class="hidden" required />
+          </div>
+          <img id="preview" alt="Prévia" class="hidden mt-2 w-full h-40 object-cover rounded-xl border" />
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">Cadastrar</button>
+          <button type="reset" class="btn btn-secondary">Limpar</button>
+        </div>
+      </form>
+    </aside>
   </main>
 
-  <!-- Modal Login -->
-  <div id="modalAuth" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-6 w-80">
-      <h3 class="text-xl font-bold mb-3 text-center">Login</h3>
-      <input id="loginEmail" type="email" placeholder="E-mail" class="w-full border p-2 mb-2 rounded">
-      <input id="loginPass" type="password" placeholder="Senha" class="w-full border p-2 mb-3 rounded">
-      <button id="doLogin" class="bg-green-700 text-white w-full px-3 py-2 rounded mb-2 hover:bg-green-800">Entrar</button>
-      <button id="closeModal" class="w-full px-3 py-2 rounded border">Cancelar</button>
-      <p id="loginErr" class="text-red-600 text-sm mt-2 hidden"></p>
-    </div>
-  </div>
-
-  <!-- Carrinho -->
-  <div id="modalCart" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-6 w-[400px] max-h-[80vh] overflow-y-auto">
-      <h3 class="text-xl font-bold mb-3">Seu Carrinho</h3>
-      <div id="cartItems" class="space-y-2 mb-4"></div>
-      <div class="flex justify-between font-bold mb-3">
-        <span>Total:</span>
-        <span id="cartTotal" class="text-green-700">R$ 0,00</span>
+  <!-- Modais -->
+  <dialog id="settings" class="backdrop:bg-black/30 rounded-2xl w-full max-w-lg p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Configurações do frontend</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
-      <button id="checkoutBtn" class="bg-blue-600 text-white w-full px-3 py-2 rounded mb-2 hover:bg-blue-700">Finalizar Compra</button>
-      <button id="closeCart" class="w-full px-3 py-2 rounded border">Fechar</button>
-    </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="apiBase">API Base URL</label>
+          <input id="apiBase" class="field" placeholder="https://cupcakesparatodos.onrender.com" />
+        </div>
+        <div class="text-xs text-gray-600">
+          Endpoints esperados:
+          <ul class="list-disc ml-5">
+            <li><code>POST /api/auth/login</code> ou <code>/auth/login</code></li>
+            <li><code>POST /api/auth/register</code> ou <code>/auth/register</code></li>
+            <li><code>GET /api/cupcakes</code> ou <code>/cupcakes</code></li>
+            <li><code>POST /api/admin/cupcakes</code></li>
+            <li><code>DELETE /api/admin/cupcakes/:id</code></li>
+          </ul>
+        </div>
+        <div class="flex gap-2">
+          <button id="btnSaveBase" type="button" class="btn btn-primary">Salvar URL</button>
+          <button id="btnPing" type="button" class="btn btn-secondary">Testar conexão</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="auth" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Entrar</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="email">E-mail</label>
+          <input id="email" type="email" required class="field" placeholder="email@exemplo.com" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="password">Senha</label>
+          <input id="password" type="password" required class="field" placeholder="••••••••" />
+        </div>
+        <div class="flex gap-2">
+          <button id="doLogin" type="button" class="btn btn-primary">Entrar</button>
+          <button value="cancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+        <p class="text-xs text-gray-600">Não possui conta? <button type="button" id="openRegisterInline" class="underline">Cadastre-se</button></p>
+        <p id="authError" class="hidden text-sm text-red-600"></p>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="register" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Cadastro</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="rname">Nome</label>
+          <input id="rname" class="field" placeholder="Seu nome" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="remail">E-mail</label>
+          <input id="remail" type="email" required class="field" placeholder="email@exemplo.com" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="rpass">Senha</label>
+          <input id="rpass" type="password" required class="field" placeholder="••••••••" />
+        </div>
+        <div class="flex gap-2">
+          <button id="doRegister" type="button" class="btn btn-primary">Cadastrar</button>
+          <button value="cancel" class="btn btn-secondary">Cancelar</button>
+        </div>
+        <p id="regError" class="hidden text-sm text-red-600"></p>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="cart" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl w-full">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Carrinho</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div id="cartList" class="space-y-3 max-h-[60vh] overflow-auto"></div>
+      <div class="flex items-center justify-between mt-4">
+        <div class="text-sm text-gray-600">Total: <b id="cartTotal">R$ 0,00</b></div>
+        <div class="flex gap-2">
+          <button id="btnCheckout" type="button" class="btn btn-primary">Efetuar pagamento</button>
+          <button value="cancel" class="btn btn-secondary">Continuar comprando</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="checkout" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Pagamento</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <p class="text-sm mb-3">Código da compra: <b id="orderCode"></b></p>
+      <p class="text-sm text-gray-700">para confirmar sua compra transfira o valor da sua compra para nosso PIX: <b>cpt@cupcake.com</b>, insira o código da sua compra na sua tranferencia.</p>
+      <div class="mt-4">
+        <button class="btn btn-primary">Concluir</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
+    <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    let cart = [], token=null, user=null;
-
-    async function api(path,opt={}) {
-      opt.headers = opt.headers || {};
-      if(token) opt.headers['Authorization'] = 'Bearer '+token;
-      if(opt.body && !(opt.body instanceof FormData)){
-        opt.headers['Content-Type']='application/json';
-        opt.body = JSON.stringify(opt.body);
-      }
-      const res = await fetch(window.API_BASE+path,opt);
-      if(!res.ok) throw new Error((await res.json()).message || 'Erro');
-      return res.json();
-    }
-
-    async function loadCupcakes(){
-      try{
-        const cupcakes = await api('/api/cupcakes');
-        const list = $('cupcakeList');
-        list.innerHTML = '';
-        cupcakes.forEach(c => {
-          const card = document.createElement('div');
-          card.className = 'bg-white rounded-lg shadow p-4 flex flex-col';
-          card.innerHTML = `
-            <img src="${c.image_url||'https://via.placeholder.com/300x200'}" class="rounded mb-3">
-            <h3 class="text-lg font-bold text-green-700">${c.nome}</h3>
-            <p class="text-yellow-600 font-semibold">R$ ${(c.preco_cents/100).toFixed(2)}</p>
-            <button class="bg-blue-600 text-white px-3 py-1 mt-2 rounded hover:bg-blue-700" onclick="addToCart(${c.id},'${c.nome}',${c.preco_cents})">Adicionar ao Carrinho</button>
-          `;
-          list.appendChild(card);
-        });
-      }catch(e){ console.error('Erro ao carregar cupcakes',e); }
-    }
-
-    function addToCart(id,nome,preco){
-      cart.push({id,nome,preco});
-      $('cartCount').textContent = cart.length;
-    }
-
-    $('btnCart').onclick=()=>{$('modalCart').classList.remove('hidden');renderCart();}
-    $('closeCart').onclick=()=>$('modalCart').classList.add('hidden');
-    $('btnLogin').onclick=()=>$('modalAuth').classList.remove('hidden');
-    $('closeModal').onclick=()=>$('modalAuth').classList.add('hidden');
-
-    $('doLogin').onclick=async()=>{
-      try{
-        const data=await api('/api/auth/login',{method:'POST',body:{email:$('loginEmail').value,password:$('loginPass').value}});
-        token=data.token; user=data.user;
-        $('modalAuth').classList.add('hidden');
-        alert(`Bem-vindo, ${user.email}`);
-      }catch(e){
-        $('loginErr').textContent=e.message;
-        $('loginErr').classList.remove('hidden');
-      }
-    };
-
-    function renderCart(){
-      const list=$('cartItems'); list.innerHTML=''; let total=0;
-      cart.forEach(item=>{
-        total+=item.preco;
-        const div=document.createElement('div');
-        div.className='flex justify-between';
-        div.innerHTML=`<span>${item.nome}</span><span>R$ ${(item.preco/100).toFixed(2)}</span>`;
-        list.appendChild(div);
-      });
-      $('cartTotal').textContent='R$ '+(total/100).toFixed(2);
-    }
-
-    loadCupcakes();
-  </script>
+  <script src="./app.js"></script>
 </body>
 </html>
