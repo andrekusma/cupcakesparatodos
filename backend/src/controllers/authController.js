@@ -2,73 +2,70 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/db');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-
-function toUserResponse(row) {
-  const role = row.role || 'customer';
-  return {
-    id: row.id,
-    email: row.email,
-    role,
-    isAdmin: role === 'admin'
-  };
+function signToken(user) {
+  return jwt.sign(
+    { id: user.id, role: user.role || 'user' },
+    process.env.JWT_SECRET || 'devsecret',
+    { expiresIn: '7d' }
+  );
 }
 
-// POST /api/auth/register
 async function register(req, res) {
   try {
-    const { email, password } = req.body || {};
+    const { email, password, nome, telefone, endereco } = req.body || {};
     if (!email || !password) {
-      return res.status(400).json({ message: 'Informe email e password' });
+      return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
     }
 
-    const exists = await query('SELECT 1 FROM users WHERE email = $1 LIMIT 1', [email]);
-    if (exists.rows.length) return res.status(409).json({ message: 'E-mail já cadastrado' });
+    const exists = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (exists.rowCount > 0) {
+      return res.status(409).json({ message: 'E-mail já cadastrado' });
+    }
 
     const hash = await bcrypt.hash(password, 10);
-
-    const insert = await query(
-      `INSERT INTO users (email, password_hash, role)
-       VALUES ($1, $2, $3)
-       RETURNING id, email, role, created_at`,
-      [email, hash, 'customer']
+    const ins = await query(
+      `INSERT INTO users (email, password_hash, role, nome, telefone, endereco)
+       VALUES ($1,$2,'user',$3,$4,$5)
+       RETURNING id, email, role, nome, telefone, endereco`,
+      [email, hash, nome || null, telefone || null, endereco || null]
     );
 
-    const user = insert.rows[0];
-    const token = jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
-    return res.status(201).json({ token, user: toUserResponse(user) });
+    const user = ins.rows[0];
+    const token = signToken(user);
+    return res.status(201).json({ token, user });
   } catch (e) {
-    return res.status(500).json({ message: 'Erro ao registrar' });
+    return res.status(500).json({ message: 'Erro ao cadastrar' });
   }
 }
 
-// POST /api/auth/login
 async function login(req, res) {
   try {
     const { email, password } = req.body || {};
     if (!email || !password) {
-      return res.status(400).json({ message: 'Informe email e password' });
+      return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
     }
-
-    const sel = await query(
-      `SELECT id, email, password_hash, role
+    const db = await query(
+      `SELECT id, email, password_hash, role, nome, telefone, endereco
          FROM users
-        WHERE email = $1
-        LIMIT 1`,
+        WHERE email = $1`,
       [email]
     );
-    if (!sel.rows.length) return res.status(401).json({ message: 'Credenciais inválidas' });
-
-    const row = sel.rows[0];
-    const ok = await bcrypt.compare(password, row.password_hash);
-    if (!ok) return res.status(401).json({ message: 'Credenciais inválidas' });
-
-    const token = jwt.sign({ sub: row.id, role: row.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-    return res.json({ token, user: toUserResponse(row) });
+    if (db.rowCount === 0) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+    const u = db.rows[0];
+    const ok = await bcrypt.compare(password, u.password_hash);
+    if (!ok) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+    const user = {
+      id: u.id, email: u.email, role: u.role,
+      nome: u.nome, telefone: u.telefone, endereco: u.endereco
+    };
+    const token = signToken(user);
+    return res.json({ token, user });
   } catch (e) {
-    return res.status(500).json({ message: 'Erro ao autenticar' });
+    return res.status(500).json({ message: 'Erro no login' });
   }
 }
 
