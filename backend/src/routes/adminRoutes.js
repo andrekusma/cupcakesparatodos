@@ -1,25 +1,23 @@
-// backend/src/routes/adminRoutes.js
-import express from 'express';
-import {
-  createCupcake,
-  updateCupcake,
-  deleteCupcake
-} from '../controllers/cupcakeController.js';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
-
+const express = require('express');
 const router = express.Router();
-import { upload } from '../middleware/upload.js';
 
-// Todas as rotas de admin exigem autenticação
-router.use(requireAuth);
+const { upload } = require('../middleware/upload');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
+const cupcakeController = require('../controllers/cupcakeController');
 
-// Criar cupcake
-router.post('/cupcakes', requireAdmin, upload.single('image'), createCupcake);
+router.post(
+  '/admin/cupcakes',
+  requireAuth,
+  requireAdmin,
+  upload.single('image'),
+  cupcakeController.createCupcake
+);
 
-// Atualizar cupcake
-router.put('/cupcakes/:id', requireAdmin, updateCupcake);
+router.delete(
+  '/admin/cupcakes/:id',
+  requireAuth,
+  requireAdmin,
+  cupcakeController.deleteCupcake
+);
 
-// Excluir cupcake
-router.delete('/cupcakes/:id', requireAdmin, deleteCupcake);
-
-export { router as adminRouter };
+module.exports = router;

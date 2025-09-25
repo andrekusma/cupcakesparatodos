@@ -1,14 +1,8 @@
-// backend/src/routes/cupcakeRoutes.js
-import express from 'express';
-import { getCupcakes, createCupcake, updateCupcake, deleteCupcake } from '../controllers/cupcakeController.js';
-import { requireAdmin } from '../middleware/auth.js';
+const express = require('express');
+const router = express.Router();
 
-export const cupcakeRouter = express.Router();
+const cupcakeController = require('../controllers/cupcakeController');
 
-// GET: público - qualquer visitante pode listar os cupcakes
-cupcakeRouter.get('/', getCupcakes);
+router.get('/cupcakes', cupcakeController.listCupcakes);
 
-// As rotas abaixo exigem que o usuário seja admin
-cupcakeRouter.post('/', requireAdmin, createCupcake);
-cupcakeRouter.put('/:id', requireAdmin, updateCupcake);
-cupcakeRouter.delete('/:id', requireAdmin, deleteCupcake);
+module.exports = router;

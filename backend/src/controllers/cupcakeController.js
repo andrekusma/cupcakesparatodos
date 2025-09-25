@@ -1,43 +1,78 @@
-import { query } from '../config/db.js';
+const path = require('path');
+const fs = require('fs');
+const url = require('url');
+const { UPLOAD_DIR } = require('../middleware/upload');
+const pool = require('../db'); // deve exportar um Pool do pg
 
-export async function getCupcakes(req, res, next) {
-  try {
-    const { rows } = await query('SELECT * FROM cupcakes ORDER BY id DESC');
-    res.json(rows);
-  } catch (e) { next(e); }
+function publicBase(req) {
+  return process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
 }
 
-export async function createCupcake(req, res, next) {
+exports.listCupcakes = async (_req, res) => {
   try {
-    const { nome, preco_cents, estoque } = req.body;
-    if (!req.file) return res.status(400).json({ message: 'Imagem é obrigatória' });
-
-    const image_url = `/uploads/${req.file.filename}`;
-    const { rows } = await query(
-      'INSERT INTO cupcakes (nome, preco_cents, estoque, image_url) VALUES ($1,$2,$3,$4) RETURNING *',
-      [nome, preco_cents, estoque, image_url]
+    const { rows } = await pool.query(
+      `SELECT id, nome, descricao, preco_cents, estoque, image_url
+       FROM cupcakes
+       ORDER BY id DESC`
     );
-    res.status(201).json(rows[0]);
-  } catch (e) { next(e); }
-}
+    return res.json(rows);
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro ao listar' });
+  }
+};
 
-export async function updateCupcake(req, res, next) {
+exports.createCupcake = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { nome, preco_cents, estoque } = req.body;
-    const { rows } = await query(
-      'UPDATE cupcakes SET nome=$1, preco_cents=$2, estoque=$3 WHERE id=$4 RETURNING *',
-      [nome, preco_cents, estoque, id]
+    if (!req.file) return res.status(400).json({ message: 'Imagem é obrigatória (campo image)' });
+
+    const nome = (req.body.nome || '').trim();
+    if (!nome) return res.status(400).json({ message: 'Campo "nome" é obrigatório' });
+
+    const descricao = (req.body.descricao || '').trim();
+    const preco_cents = Number.isInteger(Number(req.body.preco_cents))
+      ? parseInt(req.body.preco_cents, 10)
+      : 0;
+    const estoque = Number.isInteger(Number(req.body.estoque))
+      ? parseInt(req.body.estoque, 10)
+      : 0;
+
+    const relative = `/uploads/${req.file.filename}`;
+    const image_url = `${publicBase(req)}${relative}`;
+
+    const { rows } = await pool.query(
+      `INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url)
+       VALUES ($1,$2,$3,$4,$5)
+       RETURNING id, nome, descricao, preco_cents, estoque, image_url`,
+      [nome, descricao, preco_cents, estoque, image_url]
     );
-    if (!rows.length) return res.status(404).json({ message: 'Cupcake não encontrado' });
-    res.json(rows[0]);
-  } catch (e) { next(e); }
-}
 
-export async function deleteCupcake(req, res, next) {
+    return res.status(201).json(rows[0]);
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro ao criar' });
+  }
+};
+
+exports.deleteCupcake = async (req, res) => {
   try {
-    const { id } = req.params;
-    await query('DELETE FROM cupcakes WHERE id=$1', [id]);
-    res.status(204).end();
-  } catch (e) { next(e); }
-}
+    const id = parseInt(req.params.id, 10);
+
+    const get = await pool.query('SELECT image_url FROM cupcakes WHERE id = $1', [id]);
+    if (!get.rows.length) return res.status(404).json({ message: 'Cupcake não encontrado' });
+
+    await pool.query('DELETE FROM cupcakes WHERE id = $1', [id]);
+
+    const imageUrl = get.rows[0].image_url || '';
+    try {
+      const pathname = url.parse(imageUrl).pathname || '';
+      const filename = path.basename(pathname);
+      const filePath = path.join(UPLOAD_DIR, filename);
+      fs.promises.unlink(filePath).catch(() => {});
+    } catch {
+      /* ignora erro ao remover arquivo */
+    }
+
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro ao excluir' });
+  }
+};

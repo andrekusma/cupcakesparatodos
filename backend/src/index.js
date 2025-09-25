@@ -1,43 +1,29 @@
-import express from 'express';
-import cors from 'cors';
-import 'dotenv/config';
+require('dotenv').config();
 
-import { authRouter } from './routes/authRoutes.js';
-import { cupcakeRouter } from './routes/cupcakeRoutes.js';
-import { adminRouter } from './routes/adminRoutes.js';
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+const { UPLOAD_DIR } = require('./middleware/upload');
+
+const authRoutes = require('./routes/authRoutes');
+const cupcakeRoutes = require('./routes/cupcakeRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-const allowed = (process.env.ALLOWED_ORIGINS || '*')
-  .split(',')
-  .map(s => s.trim());
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-  origin: (origin, cb) => {
-    if (allowed.includes('*') || !origin || allowed.includes(origin)) cb(null, true);
-    else cb(new Error('Origin not allowed'));
-  }
-}));
+app.use('/uploads', express.static(UPLOAD_DIR));
 
-app.use(express.json({ limit: '5mb' }));
+app.get('/healthz', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
-// Permite acesso às imagens
-app.use('/uploads', express.static('uploads'));
+app.use('/api', authRoutes);
+app.use('/api', cupcakeRoutes);
+app.use('/api', adminRoutes);
 
-app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
-
-app.use('/api/auth', authRouter);
-app.use('/api/cupcakes', cupcakeRouter);
-app.use('/api/admin', adminRouter);
-
-// error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({ message: err.message || 'Erro interno' });
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log('Cupcake API ouvindo na porta ' + port);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`API on ${PORT}`);
 });

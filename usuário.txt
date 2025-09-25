@@ -3,3 +3,8 @@ ADMIN_PASSWORD=admin123
 
 ADMIN_EMAIL=teste@teste.com
 ADMIN_PASSWORD=teste
+
+Banco:
+
+User: cupcake_db_j8vt_user
+Pass: 
