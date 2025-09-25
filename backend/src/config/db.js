@@ -1,19 +1,18 @@
-import pg from 'pg';
-import 'dotenv/config';
+const { Pool } = require('pg');
+const dotenv = require('dotenv');
 
-const { Pool } = pg;
-const useSSL = (process.env.DATABASE_SSL || 'false').toLowerCase() === 'true';
+dotenv.config();
 
-export const pool = new Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: useSSL ? { rejectUnauthorized:false } : false
+  ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false
 });
 
-export async function query(text, params){
-  const client = await pool.connect();
-  try{
-    return await client.query(text, params);
-  } finally {
-    client.release();
-  }
+async function query(text, params) {
+  return pool.query(text, params);
 }
+
+module.exports = {
+  query,
+  pool
+};
