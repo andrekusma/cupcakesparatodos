@@ -30,7 +30,17 @@
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="h-10 w-28 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 grid place-content-center text-white font-extrabold tracking-widest select-none">CPT</div>
+        <svg class="h-10 w-28 select-none" viewBox="0 0 112 40" xmlns="http://www.w3.org/2000/svg" aria-label="CPT">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f472b6"/>
+              <stop offset="100%" stop-color="#db2777"/>
+            </linearGradient>
+          </defs>
+          <rect rx="10" ry="10" width="112" height="40" fill="url(#g)"/>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+                font-family="Inter,system-ui,Segoe UI,Arial" font-weight="900" font-size="20" fill="#ffffff">CPT</text>
+        </svg>
         <h1 class="text-lg font-extrabold leading-tight select-none">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2">
@@ -279,7 +289,7 @@
   </div>
 
   <script>
-    const STORAGE = { base:'API_BASE_URL', token:'JWT_TOKEN', user:'AUTH_USER', cart:'CART' };
+    const STORAGE = { base:'API_BASE_URL', token:'JWT_TOKEN', user:'AUTH_USER' };
     const getBase = () => localStorage.getItem(STORAGE.base) || 'http://localhost:3000';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items: [], filtered: [] };
@@ -287,7 +297,7 @@
     const $ = (s)=>document.querySelector(s);
     const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-    function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2200); }
+    function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2400); }
 
     const isAdmin = ()=> !!(state.user && state.user.role==='admin');
     const isLogged = ()=> !!(state.token && state.user);
@@ -295,8 +305,10 @@
     const currency = (n)=> Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
     function fullURL(pathOrUrl){ if (!pathOrUrl) return ''; if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl; const base = getBase(); return `${base}${pathOrUrl.startsWith('/')?'':'/'}${pathOrUrl}`; }
 
-    function loadCart(){ try{return JSON.parse(localStorage.getItem(STORAGE.cart)||'[]');}catch{return[];} }
-    function saveCart(arr){ localStorage.setItem(STORAGE.cart, JSON.stringify(arr)); renderCart(); }
+    function cartKey(){ const uid = state?.user?.id ?? 'guest'; return `CART_${uid}`; }
+    function loadCart(){ try{return JSON.parse(localStorage.getItem(cartKey())||'[]');}catch{return[];} }
+    function saveCart(arr){ localStorage.setItem(cartKey(), JSON.stringify(arr)); renderCart(); }
+    function clearCart(){ localStorage.removeItem(cartKey()); renderCart(); }
     function cartQty(){ return loadCart().reduce((s,i)=> s+Number(i.qty||1), 0); }
     function updateCartBadge(){ const q = cartQty(); const b = $('#cartQty'); if (q>0){ b.textContent = q; b.classList.remove('hidden'); } else { b.classList.add('hidden'); } }
     function addToCart(item){ if (!isLogged()) return toast('Entre para usar o carrinho', false); const cart = loadCart(); const idx = cart.findIndex(x=> x.id===item.id); if (idx>=0) cart[idx].qty += 1; else cart.push({ id:item.id, name:item.name, price_cents:item.price_cents, image:item.image, qty:1 }); saveCart(cart); updateCartBadge(); toast('Adicionado ao carrinho'); }
@@ -304,18 +316,19 @@
     function changeQty(id, delta){ const cart = loadCart(); const i = cart.findIndex(x=>x.id===id); if (i<0) return; cart[i].qty = Math.max(1, (cart[i].qty||1)+delta); saveCart(cart); updateCartBadge(); }
     function renderCart(){ const wrap = $('#cartItems'); if(!wrap) return; const cart = loadCart(); wrap.innerHTML = ''; let total = 0; cart.forEach(it=>{ const price = (Number(it.price_cents||0)/100); total += price * Number(it.qty||1); const row = document.createElement('div'); row.className = 'card p-3 flex items-center gap-3'; row.innerHTML = `<img src="${it.image||''}" class="w-16 h-16 object-cover rounded-lg border" alt=""><div class="flex-1"><div class="font-semibold">${it.name||'Cupcake'}</div><div class="text-sm text-gray-600">${currency(price)}</div></div><div class="flex items-center gap-2"><button class="btn btn-secondary" data-dec="${it.id}">-</button><span class="w-8 text-center">${it.qty||1}</span><button class="btn btn-secondary" data-inc="${it.id}">+</button><button class="btn btn-danger" data-rem="${it.id}">Remover</button></div>`; wrap.appendChild(row); }); $('#cartTotal').textContent = currency(total); $$('#cartItems [data-inc]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-inc')), +1)); $$('#cartItems [data-dec]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-dec')), -1)); $$('#cartItems [data-rem]').forEach(b=> b.onclick = ()=> removeFromCart(Number(b.getAttribute('data-rem')))); }
 
-    async function apiLogin(email, password){ const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Falha no login (${r.status})`); return data; }
-    async function apiRegister(email, password){ const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Falha no cadastro (${r.status})`); return data; }
-    async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error('Não foi possível carregar os cupcakes'); return r.json(); }
-    async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Erro ao criar (${r.status})`); return data; }
-    async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Falha ao excluir (${r.status})`); return true; }
-    async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await r.json().catch(()=>({ message:'Erro' })); if (!r.ok) throw new Error(data.message || `Erro ao criar pedido (${r.status})`); return data; }
+    async function parseJsonSafe(r){ const t = await r.text(); try{ return JSON.parse(t); } catch{ return { message: t || 'Erro' }; } }
+    async function apiLogin(email, password){ const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no login (${r.status})`); return data; }
+    async function apiRegister(email, password){ const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no cadastro (${r.status})`); return data; }
+    async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error(`Cupcakes (${r.status})`); return parseJsonSafe(r); }
+    async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
+    async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
+    async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
     function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`; if (!items.length){ $('#empty').classList.remove('hidden'); return; } $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
 
-    async function load(){ try{ renderSkeleton(); const data = await apiList(); state.items = Array.isArray(data) ? data : (data.items || []); applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
+    async function load(){ try{ renderSkeleton(); const data = await apiList(); const arr = Array.isArray(data) ? data : (data.items || []); state.items = arr; applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
     function applyFilter(){ const q = $('#search').value.trim().toLowerCase(); const filtered = !q ? state.items : state.items.filter(x => { const n = (x.nome||x.name||'').toLowerCase(); const d = (x.descricao||x.description||'').toLowerCase(); return n.includes(q) || d.includes(q); }); state.filtered = filtered; renderList(filtered); }
 
     function genOrderCode(){ return 'CPT-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Date.now().toString(36).toUpperCase(); }
@@ -324,13 +337,86 @@
     function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
     function validCvc(cvc){ const d=onlyDigits(cvc); return d.length===3 || d.length===4; }
 
-    function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: i.id, quantidade: i.qty || 1 })); }
-    function openCheckout(){ const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
-    async function openPix(){ const code = genOrderCode(); $('#pixCode').textContent = code; try { const items = cartToOrderItems(); await apiCreateOrder({ items, payment_method: 'pix', code }); saveCart([]); updateCartBadge(); renderCart(); $('#paymentModal').close(); $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e) { toast(e.message || 'Erro ao criar pedido', false); } }
-    function openCard(){ $('#paymentModal').close(); $('#cardModal').showModal(); }
-    function setUpPaymentUI(){ $('#btnCheckout').onclick = openCheckout; $('#payPix').onclick = openPix; $('#payCard').onclick = openCard; const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError'); function maskNumber(v){ const d=onlyDigits(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); } function maskExp(v){ const d=onlyDigits(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); } function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } } ccNumber.addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); }); ccExp.addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); }); ccCvc.addEventListener('input', validate); ccName.addEventListener('input', validate); btnFinish.onclick = async ()=>{ if(btnFinish.disabled) return; const code = genOrderCode(); try { const items = cartToOrderItems(); await apiCreateOrder({ items, payment_method: 'card', code }); saveCart([]); updateCartBadge(); renderCart(); $('#cardModal').close(); $('#pixCode').textContent = code; $('#pixModal').showModal(); toast('Pedido criado (Cartão)'); } catch(e) { toast(e.message || 'Erro ao criar pedido', false); } }; }
+    function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: Number(i.id), quantidade: Number(i.qty||1) })); }
+    function openCheckout(){
+      if(!isLogged()) { toast('Entre para finalizar a compra', false); return; }
+      const cart = loadCart();
+      const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0);
+      if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; }
+      $('#paymentModal').showModal();
+    }
 
-    function setAuthUI(){ if (isLogged()){ $('#openAuth').classList.add('hidden'); $('#openRegister').classList.add('hidden'); $('#btnLogout').classList.remove('hidden'); if (isAdmin()){ $('#adminPanel').classList.remove('hidden'); $('#openSettings').classList.remove('hidden'); } else { $('#adminPanel').classList.add('hidden'); $('#openSettings').classList.add('hidden'); } } else { $('#openAuth').classList.remove('hidden'); $('#openRegister').classList.remove('hidden'); $('#btnLogout').classList.add('hidden'); $('#adminPanel').classList.add('hidden'); $('#openSettings').classList.add('hidden'); } }
+    async function openPix(){
+      const code = genOrderCode();
+      $('#pixCode').textContent = code;
+      try {
+        const items = cartToOrderItems();
+        if(!items.length) throw new Error('Carrinho vazio');
+        await apiCreateOrder({ items, payment_method: 'pix', code });
+        clearCart(); updateCartBadge();
+        $('#paymentModal').close(); $('#pixModal').showModal();
+        toast('Pedido criado (PIX)');
+      } catch(e) {
+        toast(e.message || 'Erro ao criar pedido', false);
+      }
+    }
+
+    function openCard(){
+      $('#paymentModal').close(); $('#cardModal').showModal();
+    }
+
+    function setUpPaymentUI(){
+      $('#btnCheckout').onclick = openCheckout;
+      $('#payPix').onclick = openPix;
+      $('#payCard').onclick = openCard;
+
+      const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError');
+      function maskNumber(v){ const d=onlyDigits(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); }
+      function maskExp(v){ const d=onlyDigits(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); }
+      function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } }
+      ccNumber.addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
+      ccExp.addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
+      ccCvc.addEventListener('input', validate);
+      ccName.addEventListener('input', validate);
+
+      btnFinish.onclick = async ()=>{
+        if(btnFinish.disabled) return;
+        const code = genOrderCode();
+        try {
+          const items = cartToOrderItems();
+          if(!items.length) throw new Error('Carrinho vazio');
+          await apiCreateOrder({ items, payment_method: 'card', code });
+          clearCart(); updateCartBadge();
+          $('#cardModal').close(); $('#pixCode').textContent = code; $('#pixModal').showModal();
+          toast('Pedido criado (Cartão)');
+        } catch(e) {
+          toast(e.message || 'Erro ao criar pedido', false);
+        }
+      };
+    }
+
+    function setAuthUI(){
+      if (isLogged()){
+        $('#openAuth').classList.add('hidden');
+        $('#openRegister').classList.add('hidden');
+        $('#btnLogout').classList.remove('hidden');
+        if (isAdmin()){
+          $('#adminPanel').classList.remove('hidden');
+          $('#openSettings').classList.remove('hidden');
+        } else {
+          $('#adminPanel').classList.add('hidden');
+          $('#openSettings').classList.add('hidden');
+        }
+      } else {
+        $('#openAuth').classList.remove('hidden');
+        $('#openRegister').classList.remove('hidden');
+        $('#btnLogout').classList.add('hidden');
+        $('#adminPanel').classList.add('hidden');
+        $('#openSettings').classList.add('hidden');
+      }
+      updateCartBadge();
+      renderCart();
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       $('#openSettings').onclick = ()=> $('#settings').showModal();
@@ -341,11 +427,34 @@
       $('#openAuth').onclick = ()=> $('#auth').showModal();
       $('#openRegister').onclick = ()=> $('#register').showModal();
 
-      $('#doLogin').onclick = async ()=>{ const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden'); try{ const data = await apiLogin(email, password); state.token = data.token; state.user = data.user || null; localStorage.setItem(STORAGE.token, state.token); localStorage.setItem(STORAGE.user, JSON.stringify(state.user)); $('#auth').close(); setAuthUI(); toast('Login realizado'); load(); } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); } };
+      $('#doLogin').onclick = async ()=>{
+        const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden');
+        try{
+          const data = await apiLogin(email, password);
+          state.token = data.token; state.user = data.user || null;
+          localStorage.setItem(STORAGE.token, state.token);
+          localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
+          $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
 
-      $('#doRegister').onclick = async ()=>{ const email = $('#regEmail').value.trim(); const password = $('#regPass').value; const err = $('#regError'); err.classList.add('hidden'); try{ const data = await apiRegister(email, password); state.token = data.token; state.user = data.user || null; localStorage.setItem(STORAGE.token, state.token); localStorage.setItem(STORAGE.user, JSON.stringify(state.user)); $('#register').close(); setAuthUI(); toast('Conta criada'); load(); } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); } };
+      $('#doRegister').onclick = async ()=>{
+        const email = $('#regEmail').value.trim(); const password = $('#regPass').value; const err = $('#regError'); err.classList.add('hidden');
+        try{
+          const data = await apiRegister(email, password);
+          state.token = data.token; state.user = data.user || null;
+          localStorage.setItem(STORAGE.token, state.token);
+          localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
+          $('#register').close(); setAuthUI(); toast('Conta criada'); load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
 
-      $('#btnLogout').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load(); };
+      $('#btnLogout').onclick = ()=>{
+        localStorage.removeItem(STORAGE.token);
+        localStorage.removeItem(STORAGE.user);
+        state.token = null; state.user = null;
+        setAuthUI(); toast('Sessão encerrada'); load();
+      };
 
       $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
 
@@ -354,17 +463,30 @@
       $('#btnRefresh').onclick = load;
 
       const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
-      drop.addEventListener('click', ()=> fileInput.click());
-      drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
-      drop.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
-      drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showPreview(fileInput.files[0]); } });
-      fileInput.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
+      drop?.addEventListener('click', ()=> fileInput.click());
+      drop?.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
+      drop?.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
+      drop?.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showPreview(fileInput.files[0]); } });
+      fileInput?.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
       function showPreview(file){ const ok = /image\/(png|jpe?g)/i.test(file.type); if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; } const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden'); }
 
-      $('#formCreate').addEventListener('submit', async (e)=>{ e.preventDefault(); if (!isLogged() || !isAdmin()) return toast('Ação restrita a administradores', false); const name = $('#name').value.trim(); const description = $('#description').value.trim(); const price = $('#price').value; const stock = $('#stock').value; const file = $('#image').files[0]; try{ await apiCreate({ name, description, price, stock, file }); e.target.reset(); $('#preview').classList.add('hidden'); toast('Cupcake cadastrado'); load(); }catch(err){ toast(err.message||'Erro ao cadastrar', false); } });
+      $('#formCreate')?.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        if (!isLogged() || !isAdmin()) return toast('Ação restrita a administradores', false);
+        const name = $('#name').value.trim();
+        const description = $('#description').value.trim();
+        const price = $('#price').value;
+        const stock = $('#stock').value;
+        const file = $('#image').files[0];
+        try{
+          await apiCreate({ name, description, price, stock, file });
+          e.target.reset(); $('#preview').classList.add('hidden');
+          toast('Cupcake cadastrado'); load();
+        }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
+      });
 
       setUpPaymentUI();
-      setAuthUI(); updateCartBadge(); load();
+      setAuthUI(); load();
     });
   </script>
 </body>
