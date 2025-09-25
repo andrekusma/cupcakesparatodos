@@ -1,8 +1,9 @@
 const express = require('express');
+const { listCupcakes } = require('../controllers/cupcakeController');
+
 const router = express.Router();
 
-const ctrl = require('../controllers/cupcakeController');
-
-router.get('/cupcakes', ctrl.listCupcakes);
+// Público
+router.get('/cupcakes', listCupcakes);
 
 module.exports = router;

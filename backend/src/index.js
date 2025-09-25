@@ -5,25 +5,24 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const cupcakeRoutes = require('./routes/cupcakeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+const orderRoutes = require('./routes/orderRoutes'); // se você já tem
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// arquivos estáticos de upload (imagens)
+// Arquivos estáticos (imagens)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// MONTA TODAS AS ROTAS EM /api
+// Montagem das rotas
 app.use('/api', authRoutes);
 app.use('/api', cupcakeRoutes);
 app.use('/api', adminRoutes);
-app.use('/api', orderRoutes);
+if (orderRoutes) app.use('/api', orderRoutes);
 
+// Healthcheck
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log('API on port', PORT);
-});
+app.listen(PORT, () => console.log('API on port', PORT));

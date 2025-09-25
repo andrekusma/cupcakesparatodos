@@ -1,78 +1,69 @@
 const path = require('path');
 const fs = require('fs');
-const url = require('url');
 const { query } = require('../config/db');
-const { UPLOAD_DIR } = require('../middleware/upload');
 
-function publicBase(req) {
-  return process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+function toPublicPath(absPath) {
+  // Arquivos salvos em UPLOAD_DIR são servidos em /uploads/<arquivo>
+  const fileName = path.basename(absPath || '');
+  return fileName ? `/uploads/${fileName}` : null;
 }
 
 async function listCupcakes(_req, res) {
   try {
-    const { rows } = await query(
+    const db = await query(
       `SELECT id, nome, descricao, preco_cents, estoque, image_url
          FROM cupcakes
         ORDER BY id DESC`
     );
-    return res.json(rows);
+    return res.json(db.rows);
   } catch {
-    return res.status(500).json({ message: 'Erro ao listar' });
+    return res.status(500).json({ message: 'Erro ao listar cupcakes' });
   }
 }
 
 async function createCupcake(req, res) {
   try {
-    if (!req.file) return res.status(400).json({ message: 'Imagem é obrigatória (campo image)' });
+    const { nome, descricao, preco_cents, estoque } = req.body || {};
+    if (!nome || !descricao || !preco_cents) {
+      return res.status(400).json({ message: 'Campos obrigatórios: nome, descricao, preco_cents' });
+    }
 
-    const nome = (req.body.nome || '').trim();
-    if (!nome) return res.status(400).json({ message: 'Campo "nome" é obrigatório' });
+    let imageUrl = null;
+    if (req.file && req.file.path) {
+      imageUrl = toPublicPath(req.file.path);
+    }
 
-    const descricao = (req.body.descricao || '').trim();
-    const preco_cents = Number.isInteger(Number(req.body.preco_cents))
-      ? parseInt(req.body.preco_cents, 10)
-      : 0;
-    const estoque = Number.isInteger(Number(req.body.estoque))
-      ? parseInt(req.body.estoque, 10)
-      : 0;
-
-    const relative = `/uploads/${req.file.filename}`;
-    const image_url = `${publicBase(req)}${relative}`;
-
-    const { rows } = await query(
+    const ins = await query(
       `INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url)
        VALUES ($1,$2,$3,$4,$5)
        RETURNING id, nome, descricao, preco_cents, estoque, image_url`,
-      [nome, descricao, preco_cents, estoque, image_url]
+      [nome, descricao, Number(preco_cents), Number(estoque || 0), imageUrl]
     );
-
-    return res.status(201).json(rows[0]);
-  } catch {
-    return res.status(500).json({ message: 'Erro ao criar' });
+    return res.status(201).json(ins.rows[0]);
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro ao criar cupcake' });
   }
 }
 
 async function deleteCupcake(req, res) {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ message: 'ID inválido' });
 
-    const get = await query('SELECT image_url FROM cupcakes WHERE id=$1', [id]);
-    if (!get.rows.length) return res.status(404).json({ message: 'Cupcake não encontrado' });
+    // Opcional: apagar arquivo da imagem, se existir
+    const cur = await query('SELECT image_url FROM cupcakes WHERE id = $1', [id]);
+    await query('DELETE FROM cupcakes WHERE id = $1', [id]);
 
-    await query('DELETE FROM cupcakes WHERE id=$1', [id]);
-
-    // remove arquivo físico correspondente, se existir
-    try {
-      const imageUrl = get.rows[0].image_url || '';
-      const pathname = url.parse(imageUrl).pathname || '';
-      const filename = path.basename(pathname);
-      const filePath = path.join(UPLOAD_DIR, filename);
+    // Tentar remover arquivo físico (não falhar se não existir)
+    const imageUrl = cur.rows?.[0]?.image_url;
+    if (imageUrl && imageUrl.startsWith('/uploads/')) {
+      const filePath = path.join(__dirname, '..', '..', imageUrl.replace(/^\/+/, ''));
       fs.promises.unlink(filePath).catch(() => {});
-    } catch {}
+    }
 
     return res.json({ ok: true });
   } catch {
-    return res.status(500).json({ message: 'Erro ao excluir' });
+    return res.status(500).json({ message: 'Erro ao excluir cupcake' });
   }
 }
 
