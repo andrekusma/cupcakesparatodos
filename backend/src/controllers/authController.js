@@ -33,7 +33,7 @@ async function register(req, res) {
     const user = ins.rows[0];
     const token = signToken(user);
     return res.status(201).json({ token, user });
-  } catch (e) {
+  } catch {
     return res.status(500).json({ message: 'Erro ao cadastrar' });
   }
 }
@@ -64,9 +64,34 @@ async function login(req, res) {
     };
     const token = signToken(user);
     return res.json({ token, user });
-  } catch (e) {
+  } catch {
     return res.status(500).json({ message: 'Erro no login' });
   }
 }
 
-module.exports = { register, login };
+async function changePassword(req, res) {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ message: 'Não autenticado' });
+
+  const { current_password, new_password } = req.body || {};
+  if (!current_password || !new_password) {
+    return res.status(400).json({ message: 'Campos obrigatórios: current_password, new_password' });
+  }
+
+  try {
+    const db = await query('SELECT password_hash FROM users WHERE id = $1', [userId]);
+    if (db.rowCount === 0) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+    const ok = await bcrypt.compare(current_password, db.rows[0].password_hash);
+    if (!ok) return res.status(401).json({ message: 'Senha atual incorreta' });
+
+    const hash = await bcrypt.hash(new_password, 10);
+    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userId]);
+
+    return res.status(204).send();
+  } catch {
+    return res.status(500).json({ message: 'Erro ao alterar senha' });
+  }
+}
+
+module.exports = { register, login, changePassword };
