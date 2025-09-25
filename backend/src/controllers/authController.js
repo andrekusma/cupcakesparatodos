@@ -1,57 +1,91 @@
-import { query } from '../config/db.js';
-import { hashPassword, comparePassword } from '../utils/hash.js';
-import jwt from 'jsonwebtoken';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { query } = require('../config/db.js');
 
-export async function register(req, res, next) {
+// JWT secret e expiração
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
+// Normaliza role/admin
+function userToResponse(u) {
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role || (u.is_admin ? 'admin' : 'user'),
+    isAdmin: !!(u.role === 'admin' || u.is_admin === true)
+  };
+}
+
+// POST /api/auth/register
+async function register(req, res) {
   try {
-    console.log('📥 [REGISTER] Body recebido:', req.body); // <-- LOG NOVO
+    const { name, email, password } = req.body || {};
 
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Informe e-mail e senha' });
-    const { rows: exist } = await query('SELECT id FROM users WHERE email=$1', [email]);
-    if (exist.length) return res.status(409).json({ message: 'E-mail já cadastrado' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Informe name, email e password' });
+    }
 
-    const password_hash = await hashPassword(password);
-    const { rows } = await query(
-      'INSERT INTO users (email, password_hash, role) VALUES ($1,$2,$3) RETURNING id, email, role',
-      [email, password_hash, 'customer']
+    // verifica se já existe
+    const exists = await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [email]);
+    if (exists.rows.length) {
+      return res.status(409).json({ message: 'E-mail já cadastrado' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    // Ajuste os nomes das colunas conforme seu schema real:
+    // Exemplo comum: users(id serial, name text, email text unique, password_hash text, role text)
+    const insert = await query(
+      `INSERT INTO users (name, email, password_hash, role)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, email, role`,
+      [name, email, hash, 'user']
     );
 
-    const user = rows[0];
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const user = insert.rows[0];
+    const token = jwt.sign({ sub: user.id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-    res.status(201).json({ token, user });
+    return res.status(201).json({ token, user: userToResponse(user) });
   } catch (e) {
-    next(e);
+    return res.status(500).json({ message: 'Erro ao registrar' });
   }
 }
 
-export async function login(req, res, next) {
+// POST /api/auth/login
+async function login(req, res) {
   try {
-    console.log('📥 [LOGIN] Body recebido:', req.body); // <-- LOG NOVO
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Informe email e password' });
+    }
 
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Informe e-mail e senha' });
-
-    const { rows } = await query('SELECT id, email, password_hash, role FROM users WHERE email=$1', [email]);
-    const user = rows[0];
-    if (!user) return res.status(401).json({ message: 'Credenciais inválidas' });
-
-    const ok = await comparePassword(password, user.password_hash);
-    if (!ok) return res.status(401).json({ message: 'Credenciais inválidas' });
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+    // Ajuste os nomes das colunas conforme seu schema real:
+    // Se sua coluna se chama "senha_hash" ou "password", ajuste abaixo.
+    const q = await query(
+      `SELECT id, name, email, password_hash, role, 
+              CASE WHEN role = 'admin' THEN true ELSE false END AS is_admin
+         FROM users
+        WHERE email = $1
+        LIMIT 1`,
+      [email]
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    if (!q.rows.length) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    const row = q.rows[0];
+    const ok = await bcrypt.compare(password, row.password_hash);
+    if (!ok) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    const token = jwt.sign({ sub: row.id, role: row.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    return res.json({ token, user: userToResponse(row) });
   } catch (e) {
-    next(e);
+    return res.status(500).json({ message: 'Erro ao autenticar' });
   }
 }
+
+module.exports = { register, login };
