@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const cupcakeController = require('../controllers/cupcakeController');
+const ctrl = require('../controllers/cupcakeController');
 
-router.get('/cupcakes', cupcakeController.listCupcakes);
+router.get('/cupcakes', ctrl.listCupcakes);
 
 module.exports = router;

@@ -55,12 +55,13 @@ async function createCupcake(req, res) {
 async function deleteCupcake(req, res) {
   try {
     const id = parseInt(req.params.id, 10);
+
     const get = await query('SELECT image_url FROM cupcakes WHERE id=$1', [id]);
     if (!get.rows.length) return res.status(404).json({ message: 'Cupcake não encontrado' });
 
     await query('DELETE FROM cupcakes WHERE id=$1', [id]);
 
-    // remoção do arquivo físico (se existir)
+    // remove arquivo físico correspondente, se existir
     try {
       const imageUrl = get.rows[0].image_url || '';
       const pathname = url.parse(imageUrl).pathname || '';
