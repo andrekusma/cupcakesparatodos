@@ -4,7 +4,9 @@ const path = require('path');
 
 const UPLOAD_DIR =
   process.env.UPLOAD_DIR ||
-  (process.env.NODE_ENV === 'production' ? '/data/uploads' : path.join(__dirname, '..', '..', 'uploads'));
+  (process.env.NODE_ENV === 'production'
+    ? '/data/uploads'
+    : path.join(__dirname, '..', '..', 'uploads'));
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 

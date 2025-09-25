@@ -1,37 +1,26 @@
-// backend/src/middleware/auth.js
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-/**
- * Middleware para verificar se o usuário está autenticado.
- * Adiciona req.user se o token for válido.
- */
-export function requireAuth(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token não fornecido' });
-  }
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
-  const token = authHeader.split(' ')[1];
+function requireAuth(req, res, next) {
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+  if (!token) return res.status(401).json({ message: 'Token ausente' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = { id: payload.sub, role: payload.role };
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ message: 'Token inválido' });
   }
 }
 
-/**
- * Middleware para verificar se o usuário é administrador.
- * Exige que o requireAuth já tenha rodado antes.
- */
-export function requireAdmin(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({ message: 'Não autenticado' });
-  }
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Acesso negado: apenas administradores' });
+function requireAdmin(req, res, next) {
+  if (!req.user || (req.user.role !== 'admin')) {
+    return res.status(403).json({ message: 'Acesso restrito' });
   }
   next();
 }
+
+module.exports = { requireAuth, requireAdmin };
