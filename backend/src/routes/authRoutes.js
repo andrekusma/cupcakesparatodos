@@ -1,13 +1,12 @@
-// backend/src/routes/authRoutes.js
-import express from 'express';
-import { register, login } from '../controllers/authController.js';
-
+const express = require('express');
 const router = express.Router();
 
-// rota de registro de novo usuário (clientes)
-router.post('/register', register);
+// compat: funciona se o controller estiver em CommonJS ou ESM
+let authController = require('../controllers/authController');
+authController = authController && authController.default ? authController.default : authController;
 
-// rota de login (admin ou cliente)
-router.post('/login', login);
+// rotas
+router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
 
-export { router as authRouter };
+module.exports = router;
