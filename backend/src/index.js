@@ -14,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use('/uploads', express.static(UPLOAD_DIR));
 
 app.get('/healthz', (_req, res) => res.json({ ok: true, ts: Date.now() }));

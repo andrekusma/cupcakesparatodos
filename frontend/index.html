@@ -26,18 +26,22 @@
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
+
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="h-10 w-28 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 grid place-content-center text-white font-extrabold tracking-widest">CPT</div>
-        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
+        <div class="h-10 w-28 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 grid place-content-center text-white font-extrabold tracking-widest select-none">CPT</div>
+        <h1 class="text-lg font-extrabold leading-tight select-none">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2">
-        <button id="openSettings" class="btn btn-secondary" title="Configurar API">Configurações</button>
+        <button id="openSettings" class="btn btn-secondary hidden" title="Configurar API">Configurações</button>
         <button id="openRegister" class="btn btn-secondary">Cadastrar</button>
         <button id="openAuth" class="btn btn-primary">Entrar</button>
         <button id="btnLogout" class="btn btn-secondary hidden">Sair</button>
-        <button id="openCart" class="btn btn-secondary icon-btn" title="Carrinho">🛒<span id="cartQty" class="badge hidden">0</span></button>
+        <button id="openCart" class="btn btn-secondary icon-btn" title="Carrinho">
+          🛒
+          <span id="cartQty" class="badge hidden">0</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -72,7 +76,7 @@
         <h3 class="text-lg font-bold">Área administrativa</h3>
         <span class="chip">Admin</span>
       </div>
-      <p class="text-sm text-gray-600 mb-3">Cadastro com imagem PNG/JPEG. Campo do upload: image.</p>
+      <p class="text-sm text-gray-600 mb-3">Cadastro com imagem PNG/JPEG. Campo do upload: <b>image</b>.</p>
       <form id="formCreate" class="space-y-3">
         <div>
           <label class="text-sm font-medium text-gray-700" for="name">Nome</label>
@@ -125,6 +129,7 @@
             <li><code>GET /api/cupcakes</code></li>
             <li><code>POST /api/admin/cupcakes</code></li>
             <li><code>DELETE /api/admin/cupcakes/:id</code></li>
+            <li><code>POST /api/orders</code></li>
           </ul>
         </div>
         <div class="flex gap-2">
@@ -222,7 +227,10 @@
         <h3 class="text-lg font-bold">Pagamento via PIX</h3>
         <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
-      <p class="text-sm text-gray-700 mb-3">Para confirmar sua compra, transfira o valor da sua compra para nosso PIX: <b>cpt@cupcake.com</b>. Insira o código da sua compra na sua transferência.</p>
+      <p class="text-sm text-gray-700 mb-3">
+        Para confirmar sua compra, transfira o valor da sua compra para nosso PIX:
+        <b>cpt@cupcake.com</b>. Insira o código da sua compra na sua transferência.
+      </p>
       <div class="card p-4 text-center">
         <div class="text-xs text-gray-600">Código da compra</div>
         <div id="pixCode" class="text-xl font-extrabold mt-1 select-all">—</div>
@@ -275,14 +283,18 @@
     const getBase = () => localStorage.getItem(STORAGE.base) || 'http://localhost:3000';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items: [], filtered: [] };
+
     const $ = (s)=>document.querySelector(s);
     const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
     function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2200); }
+
     const isAdmin = ()=> !!(state.user && state.user.role==='admin');
     const isLogged = ()=> !!(state.token && state.user);
     const authHeader = ()=> state.token ? { Authorization:`Bearer ${state.token}` } : {};
     const currency = (n)=> Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
     function fullURL(pathOrUrl){ if (!pathOrUrl) return ''; if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl; const base = getBase(); return `${base}${pathOrUrl.startsWith('/')?'':'/'}${pathOrUrl}`; }
+
     function loadCart(){ try{return JSON.parse(localStorage.getItem(STORAGE.cart)||'[]');}catch{return[];} }
     function saveCart(arr){ localStorage.setItem(STORAGE.cart, JSON.stringify(arr)); renderCart(); }
     function cartQty(){ return loadCart().reduce((s,i)=> s+Number(i.qty||1), 0); }
@@ -291,24 +303,69 @@
     function removeFromCart(id){ const cart = loadCart().filter(x=> x.id!==id); saveCart(cart); updateCartBadge(); }
     function changeQty(id, delta){ const cart = loadCart(); const i = cart.findIndex(x=>x.id===id); if (i<0) return; cart[i].qty = Math.max(1, (cart[i].qty||1)+delta); saveCart(cart); updateCartBadge(); }
     function renderCart(){ const wrap = $('#cartItems'); if(!wrap) return; const cart = loadCart(); wrap.innerHTML = ''; let total = 0; cart.forEach(it=>{ const price = (Number(it.price_cents||0)/100); total += price * Number(it.qty||1); const row = document.createElement('div'); row.className = 'card p-3 flex items-center gap-3'; row.innerHTML = `<img src="${it.image||''}" class="w-16 h-16 object-cover rounded-lg border" alt=""><div class="flex-1"><div class="font-semibold">${it.name||'Cupcake'}</div><div class="text-sm text-gray-600">${currency(price)}</div></div><div class="flex items-center gap-2"><button class="btn btn-secondary" data-dec="${it.id}">-</button><span class="w-8 text-center">${it.qty||1}</span><button class="btn btn-secondary" data-inc="${it.id}">+</button><button class="btn btn-danger" data-rem="${it.id}">Remover</button></div>`; wrap.appendChild(row); }); $('#cartTotal').textContent = currency(total); $$('#cartItems [data-inc]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-inc')), +1)); $$('#cartItems [data-dec]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-dec')), -1)); $$('#cartItems [data-rem]').forEach(b=> b.onclick = ()=> removeFromCart(Number(b.getAttribute('data-rem')))); }
+
     async function apiLogin(email, password){ const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Falha no login (${r.status})`); return data; }
     async function apiRegister(email, password){ const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Falha no cadastro (${r.status})`); return data; }
     async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error('Não foi possível carregar os cupcakes'); return r.json(); }
     async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(data.message||`Erro ao criar (${r.status})`); return data; }
     async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Falha ao excluir (${r.status})`); return true; }
-    async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers:{ 'Content-Type': 'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await r.json().catch(()=>({ message:'Erro' })); if (!r.ok) throw new Error(data.message || `Erro ao criar pedido (${r.status})`); return data; }
+    async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await r.json().catch(()=>({ message:'Erro' })); if (!r.ok) throw new Error(data.message || `Erro ao criar pedido (${r.status})`); return data; }
+
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
     function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`; if (!items.length){ $('#empty').classList.remove('hidden'); return; } $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
+
     async function load(){ try{ renderSkeleton(); const data = await apiList(); state.items = Array.isArray(data) ? data : (data.items || []); applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
     function applyFilter(){ const q = $('#search').value.trim().toLowerCase(); const filtered = !q ? state.items : state.items.filter(x => { const n = (x.nome||x.name||'').toLowerCase(); const d = (x.descricao||x.description||'').toLowerCase(); return n.includes(q) || d.includes(q); }); state.filtered = filtered; renderList(filtered); }
+
     function genOrderCode(){ return 'CPT-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Date.now().toString(36).toUpperCase(); }
     function onlyDigits(s){ return String(s||'').replace(/\D+/g,''); }
     function luhn(card){ const s=onlyDigits(card); let sum=0,alt=false; for(let i=s.length-1;i>=0;i--){ let n=+s[i]; if(alt){ n*=2; if(n>9) n-=9; } sum+=n; alt=!alt; } return (sum%10)===0 && s.length>=13 && s.length<=19; }
     function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
     function validCvc(cvc){ const d=onlyDigits(cvc); return d.length===3 || d.length===4; }
-    function openCheckout(){ const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
+
     function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: i.id, quantidade: i.qty || 1 })); }
+    function openCheckout(){ const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
     async function openPix(){ const code = genOrderCode(); $('#pixCode').textContent = code; try { const items = cartToOrderItems(); await apiCreateOrder({ items, payment_method: 'pix', code }); saveCart([]); updateCartBadge(); renderCart(); $('#paymentModal').close(); $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e) { toast(e.message || 'Erro ao criar pedido', false); } }
     function openCard(){ $('#paymentModal').close(); $('#cardModal').showModal(); }
-    function setUpPaymentUI(){ $('#btnCheckout').onclick = openCheckout; $('#payPix').onclick = openPix; $('#payCard').onclick = openCard; const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError'); function maskNumber(v){ const d=onlyDigits(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); } function maskExp(v){ const d=onlyDigits(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); } function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList
+    function setUpPaymentUI(){ $('#btnCheckout').onclick = openCheckout; $('#payPix').onclick = openPix; $('#payCard').onclick = openCard; const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError'); function maskNumber(v){ const d=onlyDigits(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); } function maskExp(v){ const d=onlyDigits(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); } function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } } ccNumber.addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); }); ccExp.addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); }); ccCvc.addEventListener('input', validate); ccName.addEventListener('input', validate); btnFinish.onclick = async ()=>{ if(btnFinish.disabled) return; const code = genOrderCode(); try { const items = cartToOrderItems(); await apiCreateOrder({ items, payment_method: 'card', code }); saveCart([]); updateCartBadge(); renderCart(); $('#cardModal').close(); $('#pixCode').textContent = code; $('#pixModal').showModal(); toast('Pedido criado (Cartão)'); } catch(e) { toast(e.message || 'Erro ao criar pedido', false); } }; }
+
+    function setAuthUI(){ if (isLogged()){ $('#openAuth').classList.add('hidden'); $('#openRegister').classList.add('hidden'); $('#btnLogout').classList.remove('hidden'); if (isAdmin()){ $('#adminPanel').classList.remove('hidden'); $('#openSettings').classList.remove('hidden'); } else { $('#adminPanel').classList.add('hidden'); $('#openSettings').classList.add('hidden'); } } else { $('#openAuth').classList.remove('hidden'); $('#openRegister').classList.remove('hidden'); $('#btnLogout').classList.add('hidden'); $('#adminPanel').classList.add('hidden'); $('#openSettings').classList.add('hidden'); } }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      $('#openSettings').onclick = ()=> $('#settings').showModal();
+      $('#apiBase').value = getBase();
+      $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
+      $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
+
+      $('#openAuth').onclick = ()=> $('#auth').showModal();
+      $('#openRegister').onclick = ()=> $('#register').showModal();
+
+      $('#doLogin').onclick = async ()=>{ const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden'); try{ const data = await apiLogin(email, password); state.token = data.token; state.user = data.user || null; localStorage.setItem(STORAGE.token, state.token); localStorage.setItem(STORAGE.user, JSON.stringify(state.user)); $('#auth').close(); setAuthUI(); toast('Login realizado'); load(); } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); } };
+
+      $('#doRegister').onclick = async ()=>{ const email = $('#regEmail').value.trim(); const password = $('#regPass').value; const err = $('#regError'); err.classList.add('hidden'); try{ const data = await apiRegister(email, password); state.token = data.token; state.user = data.user || null; localStorage.setItem(STORAGE.token, state.token); localStorage.setItem(STORAGE.user, JSON.stringify(state.user)); $('#register').close(); setAuthUI(); toast('Conta criada'); load(); } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); } };
+
+      $('#btnLogout').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load(); };
+
+      $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
+
+      $('#search').addEventListener('input', applyFilter);
+      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
+      $('#btnRefresh').onclick = load;
+
+      const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
+      drop.addEventListener('click', ()=> fileInput.click());
+      drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
+      drop.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
+      drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showPreview(fileInput.files[0]); } });
+      fileInput.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
+      function showPreview(file){ const ok = /image\/(png|jpe?g)/i.test(file.type); if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; } const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden'); }
+
+      $('#formCreate').addEventListener('submit', async (e)=>{ e.preventDefault(); if (!isLogged() || !isAdmin()) return toast('Ação restrita a administradores', false); const name = $('#name').value.trim(); const description = $('#description').value.trim(); const price = $('#price').value; const stock = $('#stock').value; const file = $('#image').files[0]; try{ await apiCreate({ name, description, price, stock, file }); e.target.reset(); $('#preview').classList.add('hidden'); toast('Cupcake cadastrado'); load(); }catch(err){ toast(err.message||'Erro ao cadastrar', false); } });
+
+      setUpPaymentUI();
+      setAuthUI(); updateCartBadge(); load();
+    });
+  </script>
+</body>
+</html>
