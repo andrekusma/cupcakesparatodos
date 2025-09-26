@@ -33,6 +33,7 @@
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
+        <!-- Ícone cupcake (o mesmo da sua versão estável) -->
         <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
           <defs>
             <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
@@ -71,6 +72,7 @@
           <button id="userMenuBtn" class="btn btn-secondary"></button>
           <div id="userMenu" class="menu hidden">
             <button id="openProfile" type="button">Perfil</button>
+            <button id="openOrders" type="button">Meus pedidos</button>
             <button id="logoutFromMenu" type="button">Sair</button>
           </div>
         </div>
@@ -161,7 +163,7 @@
             <li><code>GET /api/cupcakes</code></li>
             <li><code>POST /api/admin/cupcakes</code></li>
             <li><code>DELETE /api/admin/cupcakes/:id</code></li>
-            <li><code>POST /api/orders</code></li>
+            <li><code>POST /api/orders</code>, <code>GET /api/orders/my</code></li>
           </ul>
         </div>
         <div class="flex gap-2">
@@ -395,6 +397,17 @@
     </form>
   </dialog>
 
+  <!-- NOVO: Modal Meus Pedidos -->
+  <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Meus pedidos</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div id="ordersList" class="space-y-3 max-h-[60vh] overflow-auto"></div>
+    </form>
+  </dialog>
+
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
     <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
@@ -436,6 +449,7 @@
     async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
     async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
     async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
+    async function apiGetMyOrders(){ const r = await fetch(`${getBase()}/api/orders/my`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Pedidos (${r.status})`); return data; }
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
@@ -517,6 +531,52 @@
       renderCart();
     }
 
+    function formatBRLDate(iso){
+      const d = iso ? new Date(iso) : null;
+      if(!d || isNaN(d)) return '';
+      return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    function renderOrders(orders){
+      const box = $('#ordersList');
+      box.innerHTML = '';
+      if(!Array.isArray(orders) || orders.length===0){
+        box.innerHTML = '<p class="text-gray-600 text-sm">Você ainda não tem pedidos.</p>';
+        return;
+      }
+      orders.forEach(o=>{
+        const total = currency((Number(o.total_cents||0))/100);
+        const code = o.code || `#${o.id}`;
+        const pay = (o.payment_method||'').toUpperCase()==='PIX' ? 'PIX' : (o.payment_method||'CARD'||'—').toString().toUpperCase();
+        const when = formatBRLDate(o.created_at);
+        const wrap = document.createElement('div');
+        wrap.className = 'card p-4';
+        const itemsHtml = (o.items||[]).map(it=>{
+          const img = fullURL(it.image_url||'');
+          const price = currency((Number(it.preco_unit_cents||0))/100);
+          return `<div class="flex items-center gap-3 mt-2">
+            <img src="${img}" class="w-12 h-12 object-cover rounded-lg border" alt="">
+            <div class="flex-1">
+              <div class="font-semibold">${it.nome||'Cupcake'}</div>
+              <div class="text-xs text-gray-600">Qtd: ${it.quantidade||1} • ${price}</div>
+            </div>
+          </div>`;
+        }).join('');
+        wrap.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-sm">Pedido <a class="text-pink-600 font-semibold hover:underline">${code}</a></div>
+              <div class="text-sm">Pagamento: <span class="font-semibold">${pay}</span></div>
+            </div>
+            <div class="text-xs text-gray-600">${when}</div>
+          </div>
+          ${itemsHtml ? `<div class="mt-2">${itemsHtml}</div>` : ''}
+          <div class="mt-3 text-right font-bold">Total: ${total}</div>
+        `;
+        box.appendChild(wrap);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       $('#openSettings').onclick = ()=> $('#settings').showModal();
       $('#apiBase').value = getBase();
@@ -538,6 +598,19 @@
         } catch(e){ toast(e.message, false); }
       };
       $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
+
+      // NOVO: abrir "Meus pedidos"
+      $('#openOrders').onclick = async (e)=>{
+        e.stopPropagation(); toggleMenu(false);
+        if(!isLogged()){ toast('Entre para ver seus pedidos', false); return; }
+        try{
+          const data = await apiGetMyOrders();
+          renderOrders(Array.isArray(data)?data:(data.orders||[]));
+          $('#ordersModal').showModal();
+        }catch(err){
+          toast(err.message||'Erro ao carregar pedidos', false);
+        }
+      };
 
       $('#doLogin').onclick = async ()=>{
         const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden');
