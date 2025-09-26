@@ -1,116 +1,158 @@
 const { query } = require('../config/db');
 
-async function createOrder(req, res) {
+function requireItems(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    const err = new Error('Lista de itens vazia');
+    err.status = 400;
+    throw err;
+  }
+}
+
+function normalizePayment(p) {
+  const v = String(p || '').toLowerCase().trim();
+  if (v === 'pix') return 'pix';
+  if (v === 'card' || v === 'cartao' || v === 'cartão' || v === 'credito' || v === 'crédito') return 'card';
+  return null;
+}
+
+exports.createOrder = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { items, payment_method, code } = req.body;
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Itens do pedido inválidos' });
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: 'Não autenticado' });
+
+    const { items, payment_method, code } = req.body || {};
+    requireItems(items);
+
+    const pay = normalizePayment(payment_method);
+    if (!pay) return res.status(400).json({ message: 'Forma de pagamento inválida' });
+
+    await query('BEGIN');
+
+    const priceMap = new Map();
+    const ids = items.map(i => Number(i.cupcake_id)).filter(Boolean);
+    if (ids.length) {
+      const { rows } = await query(
+        `SELECT id, preco_cents, estoque FROM cupcakes WHERE id = ANY($1::int[])`,
+        [ids]
+      );
+      rows.forEach(r => priceMap.set(r.id, { preco_cents: Number(r.preco_cents || 0), estoque: Number(r.estoque || 0) }));
     }
 
     let totalCents = 0;
-    const priced = [];
+    const safeItems = [];
+
     for (const it of items) {
-      const cid = Number(it.cupcake_id);
+      const cupcakeId = Number(it.cupcake_id);
       const qty = Math.max(1, Number(it.quantidade || 1));
-      const { rows } = await query('SELECT id, preco_cents FROM cupcakes WHERE id = $1', [cid]);
-      if (!rows[0]) return res.status(400).json({ message: `Cupcake ${cid} não encontrado` });
-      const unit = Number(rows[0].preco_cents || 0);
-      totalCents += unit * qty;
-      priced.push({ cupcake_id: cid, quantidade: qty, preco_unit_cents: unit });
+      const pr = priceMap.get(cupcakeId);
+      if (!pr) {
+        await query('ROLLBACK');
+        return res.status(400).json({ message: `Cupcake ${cupcakeId} inválido` });
+      }
+      if (pr.estoque != null && pr.estoque < qty) {
+        await query('ROLLBACK');
+        return res.status(409).json({ message: `Estoque insuficiente para o cupcake ${cupcakeId}` });
+      }
+      totalCents += pr.preco_cents * qty;
+      safeItems.push({ cupcake_id: cupcakeId, quantidade: qty, preco_unit_cents: pr.preco_cents });
     }
 
-    let orderId;
+    const insertOrderSql = `
+      INSERT INTO orders (user_id, code, payment_method, total_cents)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, user_id, code, payment_method, total_cents, created_at
+    `;
+    const { rows: orderRows } = await query(insertOrderSql, [userId, code || null, pay, totalCents]);
+    const order = orderRows[0];
 
-    // Tenta inserir com payment_method e code; se não existir coluna, cai para alternativas.
-    try {
-      const ins = await query(
-        'INSERT INTO orders (user_id, total_cents, payment_method, code) VALUES ($1,$2,$3,$4) RETURNING id',
-        [userId, totalCents, payment_method || null, code || null]
+    for (const it of safeItems) {
+      await query(
+        `INSERT INTO order_items (order_id, cupcake_id, quantidade, preco_unit_cents)
+         VALUES ($1, $2, $3, $4)`,
+        [order.id, it.cupcake_id, it.quantidade, it.preco_unit_cents]
       );
-      orderId = ins.rows[0].id;
-    } catch {
-      try {
-        const ins2 = await query(
-          'INSERT INTO orders (user_id, total_cents, code) VALUES ($1,$2,$3) RETURNING id',
-          [userId, totalCents, code || null]
-        );
-        orderId = ins2.rows[0].id;
-      } catch {
-        const ins3 = await query(
-          'INSERT INTO orders (user_id, total_cents) VALUES ($1,$2) RETURNING id',
-          [userId, totalCents]
-        );
-        orderId = ins3.rows[0].id;
+
+      await query(
+        `UPDATE cupcakes
+           SET estoque = CASE
+                           WHEN estoque IS NULL THEN NULL
+                           ELSE GREATEST(estoque - $1, 0)
+                         END
+         WHERE id = $2`,
+        [it.quantidade, it.cupcake_id]
+      );
+    }
+
+    await query('COMMIT');
+
+    return res.status(201).json({
+      id: order.id,
+      code: order.code,
+      payment_method: order.payment_method,
+      total_cents: order.total_cents,
+      created_at: order.created_at
+    });
+  } catch (err) {
+    try { await query('ROLLBACK'); } catch {}
+    console.error('createOrder error:', err);
+    return res.status(err.status || 500).json({ message: err.message || 'Erro ao criar pedido' });
+  }
+};
+
+exports.getMyOrders = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ message: 'Não autenticado' });
+
+    const sql = `
+      SELECT
+        o.id,
+        o.code,
+        o.payment_method,
+        o.total_cents,
+        o.created_at,
+        oi.id   AS order_item_id,
+        oi.quantidade,
+        oi.preco_unit_cents,
+        c.id    AS cupcake_id,
+        c.nome,
+        c.preco_cents,
+        c.image_url
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      LEFT JOIN cupcakes c     ON c.id = oi.cupcake_id
+      WHERE o.user_id = $1
+      ORDER BY o.created_at DESC, o.id DESC, oi.id ASC
+    `;
+    const { rows } = await query(sql, [userId]);
+
+    const byOrder = new Map();
+    for (const r of rows) {
+      if (!byOrder.has(r.id)) {
+        byOrder.set(r.id, {
+          id: r.id,
+          code: r.code,
+          payment_method: r.payment_method,
+          total_cents: Number(r.total_cents || 0),
+          created_at: r.created_at,
+          items: []
+        });
+      }
+      if (r.order_item_id) {
+        byOrder.get(r.id).items.push({
+          id: r.order_item_id,
+          cupcake_id: r.cupcake_id,
+          nome: r.nome,
+          quantidade: Number(r.quantidade || 0),
+          preco_unit_cents: Number(r.preco_unit_cents || r.preco_cents || 0),
+          image_url: r.image_url
+        });
       }
     }
 
-    for (const it of priced) {
-      await query(
-        'INSERT INTO order_items (order_id, cupcake_id, quantidade, preco_unit_cents) VALUES ($1,$2,$3,$4)',
-        [orderId, it.cupcake_id, it.quantidade, it.preco_unit_cents]
-      );
-    }
-
-    return res.status(201).json({ id: orderId, total_cents: totalCents, payment_method: payment_method || null });
+    return res.json(Array.from(byOrder.values()));
   } catch (err) {
-    return res.status(500).json({ message: 'Erro ao criar pedido' });
+    console.error('getMyOrders error:', err);
+    return res.status(500).json({ message: 'Erro ao listar pedidos' });
   }
-}
-
-async function getMyOrders(req, res) {
-  try {
-    const userId = req.user.id;
-
-    // Tenta selecionar payment_method; se a coluna não existir, faz um fallback sem ela.
-    let orders;
-    try {
-      const r = await query(
-        'SELECT id, user_id, total_cents, payment_method, code, created_at FROM orders WHERE user_id = $1 ORDER BY id DESC LIMIT 100',
-        [userId]
-      );
-      orders = r.rows;
-    } catch {
-      const r2 = await query(
-        'SELECT id, user_id, total_cents, created_at FROM orders WHERE user_id = $1 ORDER BY id DESC LIMIT 100',
-        [userId]
-      );
-      orders = r2.rows.map(o => ({ ...o, payment_method: null, code: null }));
-    }
-
-    const result = [];
-    for (const o of orders) {
-      const { rows: items } = await query(
-        `SELECT oi.id, oi.cupcake_id, oi.quantidade, oi.preco_unit_cents, c.nome, c.image_url
-         FROM order_items oi
-         LEFT JOIN cupcakes c ON c.id = oi.cupcake_id
-         WHERE oi.order_id = $1
-         ORDER BY oi.id ASC`,
-        [o.id]
-      );
-
-      const code = o.code || `CPT-${String(o.id).padStart(6, '0')}`;
-      result.push({
-        id: o.id,
-        code,
-        payment_method: o.payment_method, // devolve exatamente o que está salvo (pix|card|null)
-        total_cents: Number(o.total_cents || 0),
-        created_at: o.created_at,
-        items: items.map(it => ({
-          id: it.id,
-          cupcake_id: it.cupcake_id,
-          quantidade: it.quantidade,
-          preco_unit_cents: it.preco_unit_cents,
-          nome: it.nome,
-          image_url: it.image_url
-        }))
-      });
-    }
-
-    return res.json(result);
-  } catch (err) {
-    return res.status(500).json({ message: 'Erro ao obter pedidos' });
-  }
-}
-
-module.exports = { createOrder, getMyOrders };
+};
