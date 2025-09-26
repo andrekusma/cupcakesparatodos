@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cupcakes para Todos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 1rem;border-radius:.75rem;font-weight:600;cursor:pointer;transition:all .15s;user-select:none;border:1px solid transparent}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 1rem;border-radius:.75rem;font-weight:600;cursor:pointer;transition:all .15s ease;border:1px solid transparent}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
     .btn-primary{background:#e84f96;color:#fff;border-color:#e84f96}
     .btn-primary:hover{background:#d4317d;border-color:#d4317d;transform:translateY(-1px)}
     .btn-secondary{background:#fff;color:#111827;border-color:#e5e7eb}
+    .btn-secondary:hover{background:#f9fafb}
     .btn-danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+    .btn-danger:hover{background:#fecaca}
     .field{width:100%;border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem .75rem;font-size:.9rem;background:#fff;outline:none}
     .field:focus{border-color:#e84f96;box-shadow:0 0 0 3px rgba(232,79,150,.15)}
     .card{border:1px solid #e5e7eb;background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(16,24,40,.06);overflow:hidden}
@@ -23,11 +26,21 @@
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <svg width="36" height="36" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F9C25D"/><stop offset="100%" stop-color="#E99E2B"/></linearGradient></defs><path d="M10 46c2-9 9-14 22-14s20 5 22 14c0 2-2 4-4 4H14c-2 0-4-2-4-4Z" fill="url(#g)"/><circle cx="32" cy="22" r="12" fill="#F58DB5"/><path d="M22 23c3-3 8-3 10-1 3-3 9-3 12 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
-        <h1 class="text-lg font-extrabold">CPT</h1>
+        <!-- Ícone cupcake (Opção A) -->
+        <svg width="36" height="36" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F9C25D"/><stop offset="100%" stop-color="#E99E2B"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 46c2-9 9-14 22-14s20 5 22 14c0 2-2 4-4 4H14c-2 0-4-2-4-4Z" fill="url(#g)"/>
+          <circle cx="32" cy="22" r="12" fill="#F58DB5"/>
+          <path d="M22 23c3-3 8-3 10-1 3-3 9-3 12 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>
+        </svg>
+        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2">
-        <button id="btnCart" class="btn btn-secondary">Carrinho</button>
+        <span id="hello" class="hidden text-sm text-gray-700 mr-2"></span>
         <button id="btnAdmin" class="btn btn-secondary hidden">Administrador</button>
         <button id="btnProfile" class="btn btn-secondary hidden">Perfil</button>
         <button id="btnLogin" class="btn btn-primary">Entrar</button>
@@ -88,11 +101,11 @@
         </div>
         <div>
           <label class="text-sm font-medium" for="image">Imagem (PNG/JPEG)</label>
-          <div id="drop" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50">
+          <div id="drop" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition">
             <p class="text-sm text-gray-600">Arraste a imagem aqui ou clique para selecionar</p>
             <input id="image" type="file" accept="image/png,image/jpeg" class="hidden" required />
           </div>
-          <img id="preview" alt="" class="hidden mt-2 w-full h-40 object-cover rounded-xl border" />
+          <img id="preview" alt="Prévia" class="hidden mt-2 w-full h-40 object-cover rounded-xl border" />
         </div>
         <div class="flex gap-2">
           <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -111,11 +124,11 @@
       <div class="space-y-3">
         <div>
           <label class="text-sm font-medium" for="email">E-mail</label>
-          <input id="email" type="email" required class="field" />
+          <input id="email" type="email" required class="field" placeholder="admin@exemplo.com" />
         </div>
         <div>
           <label class="text-sm font-medium" for="password">Senha</label>
-          <input id="password" type="password" required class="field" />
+          <input id="password" type="password" required class="field" placeholder="••••••••" />
         </div>
         <div class="flex gap-2">
           <button id="doLogin" type="button" class="btn btn-primary">Entrar</button>
@@ -144,8 +157,6 @@
       </div>
       <div class="flex gap-2">
         <button id="btnSaveProfile" type="button" class="btn btn-primary">Salvar</button>
-        <button id="btnChangePass" type="button" class="btn btn-secondary">Alterar senha</button>
-        <button id="btnDeleteMe" type="button" class="btn btn-danger">Remover conta</button>
       </div>
       <p id="profileMsg" class="hidden text-sm"></p>
     </form>
@@ -160,92 +171,277 @@
     const getBase = () => localStorage.getItem(STORAGE.base) || 'https://cupcakesparatodos.onrender.com';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items:[], filtered:[] };
-    const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s));
-    function toast(m,ok=true){const b=$('#toast');b.classList.remove('hidden');b.firstElementChild.textContent=m;b.firstElementChild.className=`rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900':'bg-red-600'} text-white`;setTimeout(()=>b.classList.add('hidden'),2200);}
-    function authHeader(){ return state.token ? { Authorization:`Bearer ${state.token}` } : {}; }
+
+    const $ = s=>document.querySelector(s);
+    const $$ = s=>Array.from(document.querySelectorAll(s));
+
+    function toast(msg, ok=true){
+      const box = $('#toast');
+      box.classList.remove('hidden');
+      box.firstElementChild.textContent = msg;
+      box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok? 'bg-gray-900 text-white': 'bg-red-600 text-white'}`;
+      setTimeout(()=> box.classList.add('hidden'), 2200);
+    }
+    function authHeader(){ return state.token ? { Authorization: `Bearer ${state.token}` } : {}; }
     function isAdmin(){ return !!(state.user && state.user.is_admin); }
-    function currency(n){ return Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+    function currency(n){ return Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL'}); }
     function fullURL(p){ if(!p) return ''; if(/^https?:\/\//i.test(p)) return p; return `${getBase()}${p.startsWith('/')?'':'/'}${p}`; }
 
     async function apiLogin(email, password){
-      const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password}) });
-      const d = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(d.message||`Falha no login (${r.status})`); return d;
+      const r = await fetch(`${getBase()}/api/auth/login`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      const d = await r.json().catch(()=>({message:'Erro'}));
+      if(!r.ok) throw new Error(d.message||`Falha no login (${r.status})`);
+      return d; // { token, user }
     }
     async function apiMe(){
       const r = await fetch(`${getBase()}/api/auth/me`, { headers:{...authHeader()} });
-      if(r.status===401) throw new Error('Não autenticado'); const d = await r.json(); return d;
+      if(r.status===401) throw new Error('Não autenticado');
+      return r.json();
     }
-    async function apiUpdateMe(p){
-      const r = await fetch(`${getBase()}/api/auth/me`, { method:'PUT', headers:{'Content-Type':'application/json',...authHeader()}, body:JSON.stringify(p) });
-      const d = await r.json(); if(!r.ok) throw new Error(d.message||'Erro'); return d;
-    }
-    async function apiChangePass(current_password,new_password){
-      const r = await fetch(`${getBase()}/api/auth/change-password`, { method:'POST', headers:{'Content-Type':'application/json',...authHeader()}, body:JSON.stringify({current_password,new_password}) });
-      const d = await r.json(); if(!r.ok) throw new Error(d.message||'Erro'); return d;
-    }
-    async function apiDeleteMe(){
-      const r = await fetch(`${getBase()}/api/auth/me`, { method:'DELETE', headers:{...authHeader()} });
-      const d = await r.json(); if(!r.ok) throw new Error(d.message||'Erro'); return d;
+    async function apiUpdateMe(payload){
+      const r = await fetch(`${getBase()}/api/auth/me`, {
+        method:'PUT', headers:{'Content-Type':'application/json', ...authHeader()},
+        body: JSON.stringify(payload)
+      });
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.message||'Erro ao atualizar');
+      return d;
     }
 
-    async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error('Falha ao listar'); return r.json(); }
-    async function apiCreate({name,description,price,stock,file}){
+    async function apiList(){
+      const r = await fetch(`${getBase()}/api/cupcakes`);
+      if(!r.ok) throw new Error('Não foi possível carregar os cupcakes');
+      return r.json();
+    }
+    async function apiCreate({ name, description, price, stock, file }){
       const fd = new FormData();
       fd.append('nome', name);
       fd.append('descricao', description);
       fd.append('preco_cents', Math.round(Number(price)*100));
       fd.append('estoque', Number(stock||0));
       if(file) fd.append('image', file);
-      const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{...authHeader()}, body:fd });
-      const d = await r.json().catch(()=>({message:'Erro'})); if(!r.ok) throw new Error(d.message||`Erro ao criar (${r.status})`); return d;
+
+      const r = await fetch(`${getBase()}/api/admin/cupcakes`, {
+        method:'POST', headers:{ ...authHeader() }, body: fd
+      });
+      const d = await r.json().catch(()=>({message:'Erro'}));
+      if(!r.ok) throw new Error(d.message||`Erro ao criar (${r.status})`);
+      return d;
     }
     async function apiDelete(id){
-      const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{...authHeader()} });
-      if(!r.ok) throw new Error('Falha ao excluir'); return true;
+      const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, {
+        method:'DELETE', headers:{ ...authHeader() }
+      });
+      if(!r.ok) throw new Error(`Falha ao excluir (${r.status})`);
+      return true;
     }
 
-    function renderSkeleton(n=6){ const g=$('#grid'); g.innerHTML=''; for(let i=0;i<n;i++){ const el=document.createElement('div'); el.className='card'; el.innerHTML=`<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; g.appendChild(el);} }
-    function normalize(x){ const img = x.image_url||x.image||x.imageUrl||x.image_path; return { id:x.id, name:x.nome||x.name, description:x.descricao||x.description||'', price_cents: x.preco_cents ?? Math.round(Number(x.price||0)*100), image: fullURL(img) }; }
-    function renderList(list){ const g=$('#grid'); g.innerHTML=''; $('#countChip').textContent=`${list.length} ${list.length===1?'item':'itens'}`; if(!list.length){$('#empty').classList.remove('hidden');return;} $('#empty').classList.add('hidden');
-      list.map(normalize).forEach(c=>{ const el=document.createElement('article'); el.className='card flex flex-col'; el.innerHTML=`
-        <img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50">
-        <div class="p-4 flex-1 flex flex-col gap-2">
-          <h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3>
-          <p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p>
-          <div class="mt-auto flex items-center justify-between">
-            <span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span>
-            ${isAdmin()?`<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>`:`<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button>`}
-          </div>
-        </div>`; g.appendChild(el); });
-      if(isAdmin()) $$('#grid [data-del]').forEach(b=>b.onclick=async e=>{ const id=e.currentTarget.getAttribute('data-del'); if(!confirm('Excluir?'))return; try{ await apiDelete(id); toast('Excluído'); await load(); }catch(err){ toast(err.message,false);} });
+    function renderSkeleton(n=6){
+      const grid = $('#grid'); grid.innerHTML = '';
+      for(let i=0;i<n;i++){
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <div class="h-40 skeleton"></div>
+          <div class="p-4 space-y-2">
+            <div class="h-4 w-3/4 skeleton rounded"></div>
+            <div class="h-3 w-1/2 skeleton rounded"></div>
+            <div class="h-8 w-24 skeleton rounded"></div>
+          </div>`;
+        grid.appendChild(el);
+      }
+    }
+    function normalize(item){
+      const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path;
+      return {
+        id: item.id,
+        name: item.nome || item.name,
+        description: item.descricao || item.description || '',
+        price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100),
+        image: fullURL(imageRaw)
+      };
+    }
+    function renderList(items){
+      const grid = $('#grid'); grid.innerHTML = '';
+      $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`;
+      if(!items.length){ $('#empty').classList.remove('hidden'); return; }
+      $('#empty').classList.add('hidden');
+
+      items.map(normalize).forEach((c) => {
+        const el = document.createElement('article');
+        el.className = 'card flex flex-col';
+        el.innerHTML = `
+          <img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50">
+          <div class="p-4 flex-1 flex flex-col gap-2">
+            <h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3>
+            <p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p>
+            <div class="mt-auto flex items-center justify-between">
+              <span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span>
+              ${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}
+            </div>
+          </div>`;
+        grid.appendChild(el);
+      });
+
+      if (isAdmin()){
+        $$('#grid [data-del]').forEach(btn=>{
+          btn.addEventListener('click', async (ev)=>{
+            const id = ev.currentTarget.getAttribute('data-del');
+            if (!confirm('Confirma excluir este cupcake?')) return;
+            try { await apiDelete(id); toast('Cupcake excluído'); await load(); }
+            catch(e){ toast(e.message||'Erro ao excluir', false); }
+          });
+        });
+      }
     }
 
-    async function load(){ try{ renderSkeleton(); const d=await apiList(); state.items=Array.isArray(d)?d:(d.items||[]); applyFilter(); }catch(e){ toast(e.message||'Erro ao carregar',false); } }
-    function applyFilter(){ const q=$('#search').value.trim().toLowerCase(); const f=!q?state.items:state.items.filter(x=>((x.nome||x.name||'').toLowerCase().includes(q)||(x.descricao||x.description||'').toLowerCase().includes(q))); state.filtered=f; renderList(f); }
+    async function load(){
+      try{
+        renderSkeleton();
+        const data = await apiList();
+        state.items = Array.isArray(data) ? data : (data.items || []);
+        applyFilter();
+      } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); }
+    }
+    function applyFilter(){
+      const q = $('#search').value.trim().toLowerCase();
+      const filtered = !q ? state.items : state.items.filter(x => {
+        const n = (x.nome||x.name||'').toLowerCase();
+        const d = (x.descricao||x.description||'').toLowerCase();
+        return n.includes(q) || d.includes(q);
+      });
+      state.filtered = filtered;
+      renderList(filtered);
+    }
 
-    function setAuthUI(){ if(state.token&&state.user){ $('#btnLogin').classList.add('hidden'); $('#btnLogout').classList.remove('hidden'); $('#btnProfile').classList.remove('hidden'); isAdmin()?$('#adminPanel').classList.remove('hidden'):$('#adminPanel').classList.add('hidden'); isAdmin()?$('#btnAdmin').classList.remove('hidden'):$('#btnAdmin').classList.add('hidden'); } else { $('#btnLogin').classList.remove('hidden'); $('#btnLogout').classList.add('hidden'); $('#btnProfile').classList.add('hidden'); $('#adminPanel').classList.add('hidden'); $('#btnAdmin').classList.add('hidden'); } }
+    function setAuthUI(){
+      const hello = $('#hello');
+      if(state.token && state.user){
+        hello.textContent = `Olá, ${state.user.nome || state.user.email}`;
+        hello.classList.remove('hidden');
+        $('#btnLogin').classList.add('hidden');
+        $('#btnLogout').classList.remove('hidden');
+        $('#btnProfile').classList.remove('hidden');
+        isAdmin() ? $('#adminPanel').classList.remove('hidden') : $('#adminPanel').classList.add('hidden');
+        isAdmin() ? $('#btnAdmin').classList.remove('hidden') : $('#btnAdmin').classList.add('hidden');
+      } else {
+        hello.classList.add('hidden');
+        $('#btnLogin').classList.remove('hidden');
+        $('#btnLogout').classList.add('hidden');
+        $('#btnProfile').classList.add('hidden');
+        $('#adminPanel').classList.add('hidden');
+        $('#btnAdmin').classList.add('hidden');
+      }
+    }
 
-    document.addEventListener('DOMContentLoaded', async ()=>{
+    document.addEventListener('DOMContentLoaded', async () => {
       setBase(getBase());
-      $('#btnRefresh').onclick=load; $('#btnClear').onclick=()=>{ $('#search').value=''; applyFilter(); }; $('#search').oninput=applyFilter;
-      $('#btnLogin').onclick=()=>$('#auth').showModal(); $('#btnLogout').onclick=()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
-      $('#doLogin').onclick=async ()=>{ const email=$('#email').value.trim(); const password=$('#password').value; const err=$('#authError'); err.classList.add('hidden'); try{ const d=await apiLogin(email,password); state.token=d.token; state.user=d.user||null; localStorage.setItem(STORAGE.token,state.token); localStorage.setItem(STORAGE.user,JSON.stringify(state.user)); $('#auth').close(); setAuthUI(); toast('Login realizado'); load(); }catch(e){ err.textContent=e.message; err.classList.remove('hidden'); } };
-      $('#btnProfile').onclick=async ()=>{ try{ const u=await apiMe(); $('#p_nome').value=u.nome||''; $('#p_telefone').value=u.telefone||''; $('#p_lgd').value=u.endereco_logradouro||''; $('#p_num').value=u.endereco_numero||''; $('#p_bairro').value=u.endereco_bairro||''; $('#p_cidade').value=u.endereco_cidade||''; $('#p_uf').value=u.endereco_uf||''; $('#p_cep').value=u.endereco_cep||''; $('#profile').showModal(); }catch(e){ toast(e.message||'Erro',false); } };
-      $('#btnSaveProfile').onclick=async ()=>{ try{ const payload={ nome:$('#p_nome').value, telefone:$('#p_telefone').value, endereco_logradouro:$('#p_lgd').value, endereco_numero:$('#p_num').value, endereco_bairro:$('#p_bairro').value, endereco_cidade:$('#p_cidade').value, endereco_uf:$('#p_uf').value, endereco_cep:$('#p_cep').value }; const u=await apiUpdateMe(payload); state.user=u; localStorage.setItem(STORAGE.user,JSON.stringify(u)); toast('Perfil atualizado'); }catch(e){ toast(e.message||'Erro',false); } };
-      $('#btnChangePass').onclick=async ()=>{ const np=prompt('Nova senha:'); if(!np) return; try{ await apiChangePass('',np); toast('Senha alterada'); }catch(e){ toast(e.message||'Erro',false); } };
-      $('#btnDeleteMe').onclick=async ()=>{ if(!confirm('Remover conta?'))return; try{ await apiDeleteMe(); localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; $('#profile').close(); setAuthUI(); toast('Conta removida'); load(); }catch(e){ toast(e.message||'Erro',false); } };
 
-      const drop=$('#drop'), fileInput=$('#image'), preview=$('#preview');
-      drop.onclick=()=>fileInput.click();
-      drop.ondragover=e=>{e.preventDefault();drop.classList.add('bg-gray-50');};
-      drop.ondragleave=()=>drop.classList.remove('bg-gray-50');
-      drop.ondrop=e=>{e.preventDefault();drop.classList.remove('bg-gray-50'); if(e.dataTransfer.files?.[0]){ fileInput.files=e.dataTransfer.files; showPreview(fileInput.files[0]); }};
-      fileInput.onchange=e=>{ if(e.target.files?.[0]) showPreview(e.target.files[0]); };
-      function showPreview(f){ if(!/image\/(png|jpe?g)/i.test(f.type)){ toast('Apenas PNG/JPEG',false); fileInput.value=''; preview.classList.add('hidden'); return; } const url=URL.createObjectURL(f); preview.src=url; preview.classList.remove('hidden'); }
-
-      $('#formCreate').onsubmit=async e=>{ e.preventDefault(); if(!state.token||!isAdmin()) return toast('Ação restrita a administradores',false); const name=$('#name').value.trim(); const description=$('#description').value.trim(); const price=$('#price').value; const stock=$('#stock').value; const file=$('#image').files[0]; try{ await apiCreate({name,description,price,stock,file}); e.target.reset(); $('#preview').classList.add('hidden'); toast('Cupcake cadastrado'); load(); }catch(err){ toast(err.message||'Erro ao cadastrar',false); } };
+      // tentar recuperar perfil se já houver token
+      if(state.token){
+        try{
+          const me = await apiMe();
+          state.user = me;
+          localStorage.setItem(STORAGE.user, JSON.stringify(me));
+        }catch{
+          state.token = null; localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user);
+        }
+      }
 
       setAuthUI();
+      $('#btnRefresh').onclick = load;
+      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
+      $('#search').addEventListener('input', applyFilter);
+
+      $('#btnLogin').onclick = ()=> $('#auth').showModal();
+      $('#btnLogout').onclick = ()=>{
+        localStorage.removeItem(STORAGE.token);
+        localStorage.removeItem(STORAGE.user);
+        state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load();
+      };
+      $('#doLogin').onclick = async ()=>{
+        const email = $('#email').value.trim();
+        const password = $('#password').value;
+        const err = $('#authError'); err.classList.add('hidden');
+        try{
+          const data = await apiLogin(email, password);
+          state.token = data.token; state.user = data.user || null;
+          localStorage.setItem(STORAGE.token, state.token);
+          localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
+          $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
+
+      $('#btnProfile').onclick = async ()=>{
+        try{
+          const u = await apiMe();
+          $('#p_nome').value = u.nome || '';
+          $('#p_telefone').value = u.telefone || '';
+          $('#p_lgd').value = u.endereco_logradouro || '';
+          $('#p_num').value = u.endereco_numero || '';
+          $('#p_bairro').value = u.endereco_bairro || '';
+          $('#p_cidade').value = u.endereco_cidade || '';
+          $('#p_uf').value = u.endereco_uf || '';
+          $('#p_cep').value = u.endereco_cep || '';
+          $('#profile').showModal();
+        } catch(e){ toast(e.message||'Erro ao carregar perfil', false); }
+      };
+      $('#btnSaveProfile').onclick = async ()=>{
+        try{
+          const payload = {
+            nome: $('#p_nome').value,
+            telefone: $('#p_telefone').value,
+            endereco_logradouro: $('#p_lgd').value,
+            endereco_numero: $('#p_num').value,
+            endereco_bairro: $('#p_bairro').value,
+            endereco_cidade: $('#p_cidade').value,
+            endereco_uf: $('#p_uf').value,
+            endereco_cep: $('#p_cep').value
+          };
+          const u = await apiUpdateMe(payload);
+          state.user = u; localStorage.setItem(STORAGE.user, JSON.stringify(u));
+          setAuthUI(); toast('Perfil atualizado');
+        } catch(e){ toast(e.message||'Erro ao salvar', false); }
+      };
+
+      // upload/preview
+      const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
+      drop.addEventListener('click', ()=> fileInput.click());
+      drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
+      drop.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
+      drop.addEventListener('drop', (e)=>{
+        e.preventDefault(); drop.classList.remove('bg-gray-50');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          fileInput.files = e.dataTransfer.files;
+          showPreview(fileInput.files[0]);
+        }
+      });
+      fileInput.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
+      function showPreview(file){
+        const ok = /image\/(png|jpe?g)/i.test(file.type);
+        if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; }
+        const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden');
+      }
+
+      // cadastro admin
+      $('#formCreate').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        if (!state.token || !isAdmin()) return toast('Ação restrita a administradores', false);
+        const name = $('#name').value.trim();
+        const description = $('#description').value.trim();
+        const price = $('#price').value;
+        const stock = $('#stock').value;
+        const file = $('#image').files[0];
+        try{
+          await apiCreate({ name, description, price, stock, file });
+          e.target.reset(); $('#preview').classList.add('hidden');
+          toast('Cupcake cadastrado'); load();
+        }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
+      });
+
       load();
     });
   </script>

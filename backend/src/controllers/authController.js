@@ -2,14 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/db');
 
-function signToken(user) {
-  return jwt.sign(
-    { id: user.id, email: user.email, is_admin: !!user.is_admin },
-    process.env.JWT_SECRET,
-    { expiresIn: '8h' }
-  );
-}
-
 function pickUserRow(row) {
   return {
     id: row.id,
@@ -26,28 +18,54 @@ function pickUserRow(row) {
   };
 }
 
+function signToken(user) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET ausente nas variáveis de ambiente');
+  }
+  return jwt.sign(
+    { id: user.id, email: user.email, is_admin: !!user.is_admin },
+    secret,
+    { expiresIn: '8h' }
+  );
+}
+
 async function login(req, res) {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Credenciais inválidas' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Informe e-mail e senha' });
+  }
   try {
     const { rows } = await query('SELECT * FROM users WHERE email=$1 LIMIT 1', [email]);
     const u = rows[0];
     if (!u) return res.status(401).json({ message: 'Usuário ou senha inválidos' });
+
     const ok = await bcrypt.compare(password, u.senha);
     if (!ok) return res.status(401).json({ message: 'Usuário ou senha inválidos' });
-    const token = signToken(u);
+
+    let token;
+    try { token = signToken(u); }
+    catch (e) {
+      console.error('login error (JWT):', e.message);
+      return res.status(500).json({ message: 'Configuração do token ausente' });
+    }
+
     return res.json({ token, user: pickUserRow(u) });
   } catch (e) {
+    console.error('login error:', e);
     return res.status(500).json({ message: 'Erro no login' });
   }
 }
 
 async function register(req, res) {
   const { email, password, nome } = req.body || {};
-  if (!email || !password) return res.status(400).json({ message: 'Dados insuficientes' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Dados insuficientes' });
+  }
   try {
     const exists = await query('SELECT 1 FROM users WHERE email=$1 LIMIT 1', [email]);
     if (exists.rowCount) return res.status(409).json({ message: 'E-mail já cadastrado' });
+
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await query(
       `INSERT INTO users (email, senha, nome, is_admin)
@@ -56,9 +74,17 @@ async function register(req, res) {
       [email, hash, nome || null]
     );
     const u = rows[0];
-    const token = signToken(u);
+
+    let token;
+    try { token = signToken(u); }
+    catch (e) {
+      console.error('register error (JWT):', e.message);
+      return res.status(500).json({ message: 'Configuração do token ausente' });
+    }
+
     return res.status(201).json({ token, user: pickUserRow(u) });
-  } catch {
+  } catch (e) {
+    console.error('register error:', e);
     return res.status(500).json({ message: 'Erro ao cadastrar' });
   }
 }
@@ -69,7 +95,8 @@ async function getMe(req, res) {
     const u = rows[0];
     if (!u) return res.status(404).json({ message: 'Não encontrado' });
     return res.json(pickUserRow(u));
-  } catch {
+  } catch (e) {
+    console.error('getMe error:', e);
     return res.status(500).json({ message: 'Erro ao carregar perfil' });
   }
 }
@@ -103,7 +130,8 @@ async function updateMe(req, res) {
     );
     const u = rows[0];
     return res.json(pickUserRow(u));
-  } catch {
+  } catch (e) {
+    console.error('updateMe error:', e);
     return res.status(500).json({ message: 'Erro ao atualizar perfil' });
   }
 }
@@ -122,7 +150,8 @@ async function changePassword(req, res) {
     const hash = await bcrypt.hash(new_password, 10);
     await query('UPDATE users SET senha=$2 WHERE id=$1', [req.user.id, hash]);
     return res.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error('changePassword error:', e);
     return res.status(500).json({ message: 'Erro ao alterar senha' });
   }
 }
@@ -131,7 +160,8 @@ async function deleteMe(req, res) {
   try {
     await query('DELETE FROM users WHERE id=$1', [req.user.id]);
     return res.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error('deleteMe error:', e);
     return res.status(500).json({ message: 'Erro ao remover conta' });
   }
 }
