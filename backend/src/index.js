@@ -17,23 +17,26 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:5500',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'https://effulgent-lebkuchen-d94979.netlify.app'
 ];
 
-app.use(cors({
-  origin(origin, cb) {
-    if (!origin) return cb(null, true);
-    try {
-      const okListed = ALLOWED_ORIGINS.includes(origin);
-      const hostname = new URL(origin).hostname;
-      const okRender = /\.onrender\.com$/i.test(hostname);
-      const okNetlify = /\.netlify\.app$/i.test(hostname);
-      if (okListed || okRender || okNetlify) return cb(null, true);
-    } catch {}
-    return cb(new Error('Not allowed by CORS: ' + origin), false);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+  cors({
+    origin(origin, cb) {
+      if (!origin) return cb(null, true);
+      try {
+        const okListed = ALLOWED_ORIGINS.includes(origin);
+        const hostname = new URL(origin).hostname;
+        const okRender = /\.onrender\.com$/.test(hostname);
+        if (okListed || okRender) return cb(null, true);
+      } catch {}
+      return cb(new Error('Not allowed by CORS: ' + origin), false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
+
 app.options('*', cors());
 
 app.use(express.json());

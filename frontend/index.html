@@ -32,8 +32,8 @@
 
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
+      <div class="flex items-center gap-3 select-none">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10">
           <defs>
             <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#ffd6e7"/>
@@ -57,7 +57,7 @@
           <path d="M17 21c0-2.6 2.6-4.4 5.1-3.7" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
           <path d="M34 29c2.8 0 5.8-2.7 5.8-6 0-2.3-1.5-4.3-4-5 0-3.3-2.7-6-6-6-1.3 0-2.6.4-3.7 1.1 3.2.6 5.6 3.4 5.6 6.7 0 3.7-3 6.8-6.8 6.8H34z" fill="rgba(0,0,0,0.05)"/>
         </svg>
-        <h1 class="text-lg font-extrabold leading-tight select-none">Cupcakes para Todos</h1>
+        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2 relative">
         <button id="openSettings" class="btn btn-secondary hidden" title="Configurar API">Configurações</button>
@@ -71,7 +71,6 @@
           <button id="userMenuBtn" class="btn btn-secondary"></button>
           <div id="userMenu" class="menu hidden">
             <button id="openProfile" type="button">Perfil</button>
-            <button id="openMyOrders" type="button">Meus pedidos</button>
             <button id="logoutFromMenu" type="button">Sair</button>
           </div>
         </div>
@@ -163,7 +162,6 @@
             <li><code>POST /api/admin/cupcakes</code></li>
             <li><code>DELETE /api/admin/cupcakes/:id</code></li>
             <li><code>POST /api/orders</code></li>
-            <li><code>GET /api/orders/my</code></li>
           </ul>
         </div>
         <div class="flex gap-2">
@@ -364,56 +362,14 @@
     </form>
   </dialog>
 
-  <dialog id="cardModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <form method="dialog" class="glass p-5 rounded-2xl" id="cardFormEl" novalidate>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-bold">Cartão de crédito</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
-      </div>
-      <div class="space-y-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700" for="ccName">Nome do portador</label>
-          <input id="ccName" class="field" autocomplete="cc-name" placeholder="Nome impresso no cartão" required />
-        </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700" for="ccNumber">Número do cartão</label>
-          <input id="ccNumber" class="field" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" required />
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm font-medium text-gray-700" for="ccExp">Validade (MM/AA)</label>
-            <input id="ccExp" class="field" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" required />
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-700" for="ccCvc">Cód. verificação</label>
-            <input id="ccCvc" class="field" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" required />
-          </div>
-        </div>
-      </div>
-      <p id="cardError" class="hidden text-sm text-red-600 mt-2"></p>
-      <div class="mt-4 flex justify-end">
-        <button id="btnFinishCard" type="button" class="btn btn-primary" disabled>Finalizar compra</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-3xl p-0">
-    <form method="dialog" class="glass p-5 rounded-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-bold">Meus pedidos</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
-      </div>
-      <div id="ordersList" class="space-y-3 max-h-[60vh] overflow-auto"></div>
-    </form>
-  </dialog>
-
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
     <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
 
   <script>
+    const DEFAULT_BASE = 'https://cupcakesparatodos.onrender.com';
     const STORAGE = { base:'API_BASE_URL', token:'JWT_TOKEN', user:'AUTH_USER' };
-    const getBase = () => localStorage.getItem(STORAGE.base) || 'http://localhost:3000';
+    const getBase = () => localStorage.getItem(STORAGE.base) || DEFAULT_BASE;
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items: [], filtered: [] };
 
@@ -425,15 +381,6 @@
     const authHeader = ()=> state.token ? { Authorization:`Bearer ${state.token}` } : {};
     const currency = (n)=> Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
     function fullURL(pathOrUrl){ if (!pathOrUrl) return ''; if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl; const base = getBase(); return `${base}${pathOrUrl.startsWith('/')?'':'/'}${pathOrUrl}`; }
-
-    function paymentLabel(order) {
-      const raw = order?.payment_method ?? order?.payment ?? order?.pagamento ?? '';
-      const v = String(raw).toLowerCase().trim();
-      if (v === 'pix') return 'PIX';
-      if (v === 'card' || v === 'cartao' || v === 'cartão' || v === 'credito' || v === 'crédito') return 'Cartão';
-      return '—';
-    }
-    function formatDateTime(iso) { try { const d = new Date(iso); return d.toLocaleString('pt-BR', { hour12: false }); } catch { return ''; } }
 
     function cartKey(){ const uid = state?.user?.id ?? 'guest'; return `CART_${uid}`; }
     function loadCart(){ try{return JSON.parse(localStorage.getItem(cartKey())||'[]');}catch{return[];} }
@@ -457,7 +404,6 @@
     async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
     async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
     async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
-    async function apiOrdersMy(){ const r = await fetch(`${getBase()}/api/orders/my`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Pedidos (${r.status})`); return data; }
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
@@ -492,7 +438,8 @@
       $('#ccName').addEventListener('input', validate);
 
       $('#btnFinishCard').onclick = async ()=>{
-        if($('#btnFinishCard').disabled) return;
+        const btnFinish = $('#btnFinishCard');
+        if(btnFinish.disabled) return;
         const code = genOrderCode();
         try {
           const items = cartToOrderItems();
@@ -511,55 +458,6 @@
 
     function safeName(u){ return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário'; }
     function toggleMenu(show){ const menu = $('#userMenu'); if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden'); }
-
-    function renderOrderCard(order) {
-      const pm = paymentLabel(order);
-      const created = formatDateTime(order.created_at);
-      const wrapper = document.createElement('div');
-      wrapper.className = 'card p-4 space-y-2';
-      const itemsHtml = (order.items || []).map(it => {
-        const unit = (Number(it.preco_unit_cents || it.preco_cents || 0) / 100);
-        const img = it.image_url ? fullURL(it.image_url) : '';
-        return `
-          <div class="flex items-center gap-3">
-            <img src="${img}" class="w-14 h-14 rounded-lg object-cover border" alt="">
-            <div class="flex-1">
-              <div class="font-semibold">${it.nome || 'Cupcake'}</div>
-              <div class="text-sm text-gray-600">Qtd: ${it.quantidade} • ${currency(unit)}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      const total = currency((Number(order.total_cents || 0) / 100));
-      wrapper.innerHTML = `
-        <div class="flex items-center justify-between">
-          <div class="text-sm">
-            <div class="font-semibold">Pedido <span class="text-pink-600">${order.code}</span></div>
-            <div>Pagamento: <b>${pm}</b></div>
-          </div>
-          <div class="text-xs text-gray-500">${created}</div>
-        </div>
-        <div class="space-y-2 mt-2">${itemsHtml}</div>
-        <div class="text-right mt-2 font-bold">Total: ${total}</div>
-      `;
-      return wrapper;
-    }
-
-    async function openMyOrders() {
-      try {
-        const list = await apiOrdersMy();
-        const box = $('#ordersList');
-        box.innerHTML = '';
-        if (!Array.isArray(list) || list.length === 0) {
-          box.innerHTML = `<div class="text-center text-gray-600">Você ainda não possui pedidos.</div>`;
-        } else {
-          list.forEach(o => box.appendChild(renderOrderCard(o)));
-        }
-        $('#ordersModal').showModal();
-      } catch (e) {
-        toast(e.message || 'Erro ao listar pedidos', false);
-      }
-    }
 
     function setAuthUI(){
       if (isLogged()){
@@ -588,10 +486,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      const apiParam = params.get('api');
+      if (apiParam) setBase(apiParam);
+
       $('#openSettings').onclick = ()=> $('#settings').showModal();
       $('#apiBase').value = getBase();
       $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
       $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
+
+      document.addEventListener('keydown', (e) => {
+        if (e.shiftKey && e.key.toLowerCase() === 's') { $('#settings').showModal(); }
+      });
 
       $('#openAuth').onclick = ()=> $('#auth').showModal();
       $('#openRegister').onclick = ()=> $('#register').showModal();
@@ -607,7 +513,6 @@
           $('#profile').showModal();
         } catch(e){ toast(e.message, false); }
       };
-      $('#openMyOrders').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false); openMyOrders(); };
       $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
 
       $('#doLogin').onclick = async ()=>{
@@ -730,7 +635,8 @@
       });
 
       setUpPaymentUI();
-      setAuthUI(); load();
+      setAuthUI();
+      load();
     });
   </script>
 </body>
