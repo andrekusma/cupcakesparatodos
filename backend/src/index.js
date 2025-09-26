@@ -24,7 +24,7 @@ app.use(cors({
     try {
       const okListed = ALLOWED_ORIGINS.includes(origin);
       const hostname = new URL(origin).hostname;
-      const okRender = /\.onrender\.com$/.test(hostname);
+      const okRender = /\.onrender\.com$/i.test(hostname);
       if (okListed || okRender) return cb(null, true);
     } catch {}
     return cb(new Error('Not allowed by CORS: ' + origin), false);
