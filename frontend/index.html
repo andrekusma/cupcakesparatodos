@@ -71,7 +71,7 @@
           <button id="userMenuBtn" class="btn btn-secondary"></button>
           <div id="userMenu" class="menu hidden">
             <button id="openProfile" type="button">Perfil</button>
-            <button id="openOrders" type="button">Meus pedidos</button>
+            <button id="openMyOrders" type="button">Meus pedidos</button>
             <button id="logoutFromMenu" type="button">Sair</button>
           </div>
         </div>
@@ -162,7 +162,8 @@
             <li><code>GET /api/cupcakes</code></li>
             <li><code>POST /api/admin/cupcakes</code></li>
             <li><code>DELETE /api/admin/cupcakes/:id</code></li>
-            <li><code>POST /api/orders</code>, <code>GET /api/orders/my</code></li>
+            <li><code>POST /api/orders</code></li>
+            <li><code>GET /api/orders/my</code></li>
           </ul>
         </div>
         <div class="flex gap-2">
@@ -396,7 +397,7 @@
     </form>
   </dialog>
 
-  <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
+  <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-3xl p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Meus pedidos</h3>
@@ -425,6 +426,15 @@
     const currency = (n)=> Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
     function fullURL(pathOrUrl){ if (!pathOrUrl) return ''; if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl; const base = getBase(); return `${base}${pathOrUrl.startsWith('/')?'':'/'}${pathOrUrl}`; }
 
+    function paymentLabel(order) {
+      const raw = order?.payment_method ?? order?.payment ?? order?.pagamento ?? '';
+      const v = String(raw).toLowerCase().trim();
+      if (v === 'pix') return 'PIX';
+      if (v === 'card' || v === 'cartao' || v === 'cartão' || v === 'credito' || v === 'crédito') return 'Cartão';
+      return '—';
+    }
+    function formatDateTime(iso) { try { const d = new Date(iso); return d.toLocaleString('pt-BR', { hour12: false }); } catch { return ''; } }
+
     function cartKey(){ const uid = state?.user?.id ?? 'guest'; return `CART_${uid}`; }
     function loadCart(){ try{return JSON.parse(localStorage.getItem(cartKey())||'[]');}catch{return[];} }
     function saveCart(arr){ localStorage.setItem(cartKey(), JSON.stringify(arr)); renderCart(); }
@@ -447,7 +457,7 @@
     async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
     async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
     async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
-    async function apiGetMyOrders(){ const r = await fetch(`${getBase()}/api/orders/my`, { headers:{ ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message || `Pedidos (${r.status})`); return data; }
+    async function apiOrdersMy(){ const r = await fetch(`${getBase()}/api/orders/my`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Pedidos (${r.status})`); return data; }
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
@@ -502,52 +512,52 @@
     function safeName(u){ return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário'; }
     function toggleMenu(show){ const menu = $('#userMenu'); if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden'); }
 
-    function labelMetodo(m){ if(m==='pix') return 'PIX'; if(m==='card') return 'Cartão'; return '—'; }
+    function renderOrderCard(order) {
+      const pm = paymentLabel(order);
+      const created = formatDateTime(order.created_at);
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card p-4 space-y-2';
+      const itemsHtml = (order.items || []).map(it => {
+        const unit = (Number(it.preco_unit_cents || it.preco_cents || 0) / 100);
+        const img = it.image_url ? fullURL(it.image_url) : '';
+        return `
+          <div class="flex items-center gap-3">
+            <img src="${img}" class="w-14 h-14 rounded-lg object-cover border" alt="">
+            <div class="flex-1">
+              <div class="font-semibold">${it.nome || 'Cupcake'}</div>
+              <div class="text-sm text-gray-600">Qtd: ${it.quantidade} • ${currency(unit)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      const total = currency((Number(order.total_cents || 0) / 100));
+      wrapper.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="text-sm">
+            <div class="font-semibold">Pedido <span class="text-pink-600">${order.code}</span></div>
+            <div>Pagamento: <b>${pm}</b></div>
+          </div>
+          <div class="text-xs text-gray-500">${created}</div>
+        </div>
+        <div class="space-y-2 mt-2">${itemsHtml}</div>
+        <div class="text-right mt-2 font-bold">Total: ${total}</div>
+      `;
+      return wrapper;
+    }
 
-    async function openOrdersModal(){
-      try{
-        const list = await apiGetMyOrders();
-        const wrap = $('#ordersList');
-        wrap.innerHTML = '';
-        if (!Array.isArray(list) || list.length===0){
-          const empty = document.createElement('div');
-          empty.className='text-sm text-gray-600';
-          empty.textContent='Nenhum pedido encontrado.';
-          wrap.appendChild(empty);
-          $('#ordersModal').showModal();
-          return;
+    async function openMyOrders() {
+      try {
+        const list = await apiOrdersMy();
+        const box = $('#ordersList');
+        box.innerHTML = '';
+        if (!Array.isArray(list) || list.length === 0) {
+          box.innerHTML = `<div class="text-center text-gray-600">Você ainda não possui pedidos.</div>`;
+        } else {
+          list.forEach(o => box.appendChild(renderOrderCard(o)));
         }
-        list.forEach(o=>{
-          const box = document.createElement('div');
-          box.className='card p-4 space-y-2';
-          const header = document.createElement('div');
-          header.className='flex items-center justify-between';
-          header.innerHTML = `<div class="font-semibold">Pedido <span class="text-pink-600">${o.code || ('CPT-'+String(o.id).padStart(6,'0'))}</span></div><div class="text-xs text-gray-500">${new Date(o.created_at).toLocaleString('pt-BR')}</div>`;
-          const pay = document.createElement('div');
-          pay.className='text-sm';
-          pay.innerHTML = `Pagamento: <b>${labelMetodo(o.payment_method)}</b>`;
-          const items = document.createElement('div');
-          items.className='space-y-2';
-          (o.items||[]).forEach(it=>{
-            const row = document.createElement('div');
-            row.className='flex items-center gap-3';
-            row.innerHTML = `
-              <img src="${fullURL(it.image_url)||''}" class="w-12 h-12 object-cover rounded-md border" alt="">
-              <div class="flex-1">
-                <div class="font-medium">${it.nome||'Cupcake'}</div>
-                <div class="text-xs text-gray-600">Qtd: ${it.quantidade} • ${currency((it.preco_unit_cents||0)/100)}</div>
-              </div>`;
-            items.appendChild(row);
-          });
-          const total = document.createElement('div');
-          total.className='text-right font-semibold';
-          total.innerHTML = `Total: ${currency((o.total_cents||0)/100)}`;
-          box.appendChild(header); box.appendChild(pay); if((o.items||[]).length) box.appendChild(items); box.appendChild(total);
-          wrap.appendChild(box);
-        });
         $('#ordersModal').showModal();
-      }catch(e){
-        toast(e.message||'Erro ao carregar pedidos', false);
+      } catch (e) {
+        toast(e.message || 'Erro ao listar pedidos', false);
       }
     }
 
@@ -597,7 +607,7 @@
           $('#profile').showModal();
         } catch(e){ toast(e.message, false); }
       };
-      $('#openOrders').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false); openOrdersModal(); };
+      $('#openMyOrders').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false); openMyOrders(); };
       $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
 
       $('#doLogin').onclick = async ()=>{
@@ -625,11 +635,16 @@
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#register').close(); setAuthUI(); toast('Conta criado'); load();
+          $('#register').close(); setAuthUI(); toast('Conta criada'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      $('#btnLogout').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load(); };
+      $('#btnLogout').onclick = ()=>{
+        localStorage.removeItem(STORAGE.token);
+        localStorage.removeItem(STORAGE.user);
+        state.token = null; state.user = null;
+        setAuthUI(); toast('Sessão encerrada'); load();
+      };
 
       $('#btnSaveProfile').onclick = async ()=>{
         const err = $('#pfError'); err.classList.add('hidden');
