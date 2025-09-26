@@ -1,13 +1,7 @@
 const { query } = require('../config/db');
 
-function asArray(v) {
-  return Array.isArray(v) ? v : [];
-}
-
-function synthCodeFromId(id) {
-  const n = String(id || '').padStart(6, '0');
-  return `CPT-${n}`;
-}
+function asArray(v) { return Array.isArray(v) ? v : []; }
+function synthCodeFromId(id) { return `CPT-${String(id || '').padStart(6, '0')}`; }
 
 async function createOrder(req, res) {
   const userId = req.user?.id;
@@ -23,17 +17,15 @@ async function createOrder(req, res) {
   try {
     const ids = items.map(i => i.cupcake_id);
     const ph = ids.map((_, i) => `$${i + 1}`).join(',');
-    const { rows: cup } = await query(
-      `SELECT id, preco_cents FROM cupcakes WHERE id IN (${ph})`,
-      ids
-    );
+    const { rows: cup } = await query(`SELECT id, preco_cents FROM cupcakes WHERE id IN (${ph})`, ids);
 
     const priceMap = new Map(cup.map(c => [Number(c.id), Number(c.preco_cents || 0)]));
     let total_cents = 0;
-    for (const it of items) {
-      const p = priceMap.get(it.cupcake_id) || 0;
-      total_cents += p * it.quantidade;
-    }
+    const enriched = items.map(it => {
+      const preco_unit_cents = priceMap.get(it.cupcake_id) || 0;
+      total_cents += preco_unit_cents * it.quantidade;
+      return { ...it, preco_unit_cents };
+    });
 
     const { rows: ord } = await query(
       `INSERT INTO orders (user_id, payment_method, total_cents)
@@ -43,18 +35,17 @@ async function createOrder(req, res) {
     );
     const order = ord[0];
 
-    for (const it of items) {
+    for (const it of enriched) {
       await query(
-        `INSERT INTO order_items (order_id, cupcake_id, quantidade)
-         VALUES ($1,$2,$3)`,
-        [order.id, it.cupcake_id, it.quantidade]
+        `INSERT INTO order_items (order_id, cupcake_id, quantidade, preco_unit_cents)
+         VALUES ($1,$2,$3,$4)`,
+        [order.id, it.cupcake_id, it.quantidade, it.preco_unit_cents]
       );
     }
 
-    const code = synthCodeFromId(order.id);
     return res.status(201).json({
       id: order.id,
-      code,
+      code: synthCodeFromId(order.id),
       payment_method: order.payment_method,
       total_cents: Number(order.total_cents || 0),
       created_at: order.created_at,
@@ -77,16 +68,13 @@ async function getMyOrders(req, res) {
        ORDER BY created_at DESC`,
       [userId]
     );
-
-    if (!orders.length) {
-      return res.json([]);
-    }
+    if (!orders.length) return res.json([]);
 
     const orderIds = orders.map(o => o.id);
     const ph = orderIds.map((_, i) => `$${i + 1}`).join(',');
     const { rows: items } = await query(
-      `SELECT oi.order_id, oi.cupcake_id, oi.quantidade,
-              c.nome, c.image_url, c.preco_cents
+      `SELECT oi.order_id, oi.cupcake_id, oi.quantidade, oi.preco_unit_cents,
+              c.nome, c.image_url
        FROM order_items oi
        JOIN cupcakes c ON c.id = oi.cupcake_id
        WHERE oi.order_id IN (${ph})
@@ -100,7 +88,7 @@ async function getMyOrders(req, res) {
         quantidade: it.quantidade,
         nome: it.nome,
         image_url: it.image_url,
-        price_cents: it.preco_cents
+        price_cents: it.preco_unit_cents
       });
       return acc;
     }, {});
@@ -108,7 +96,7 @@ async function getMyOrders(req, res) {
     const result = orders.map(o => ({
       id: o.id,
       code: synthCodeFromId(o.id),
-      payment_method: o.payment_method,
+      payment_method: o.payment_method || null,
       total_cents: Number(o.total_cents || 0),
       created_at: o.created_at,
       items: itemsByOrder[o.id] || []
