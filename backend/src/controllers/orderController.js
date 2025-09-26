@@ -5,6 +5,11 @@ function genCode() {
   return 'CPT-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
 }
 
+function genDeterministicCode(orderId, createdAt) {
+  const ts = createdAt ? new Date(createdAt).getTime().toString(36).toUpperCase() : 'NA';
+  return `CPT-${String(orderId).padStart(4, '0')}-${ts}`;
+}
+
 exports.createOrder = async (req, res) => {
   const userId = req.user?.id;
   const { items, payment_method, code } = req.body;
@@ -13,7 +18,8 @@ exports.createOrder = async (req, res) => {
   if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: 'Itens do pedido inválidos' });
   }
-  if (!['pix', 'card'].includes(String(payment_method || '').toLowerCase())) {
+  const pm = String(payment_method || '').toLowerCase();
+  if (!['pix', 'card'].includes(pm)) {
     return res.status(400).json({ message: 'Forma de pagamento inválida' });
   }
 
@@ -22,7 +28,7 @@ exports.createOrder = async (req, res) => {
 
     const ids = items.map(i => Number(i.cupcake_id)).filter(Boolean);
     const { rows: cupcakes } = await query(
-      `SELECT id, preco_cents, nome, image_url FROM cupcakes WHERE id = ANY($1)`,
+      `SELECT id, preco_cents FROM cupcakes WHERE id = ANY($1)`,
       [ids]
     );
     const byId = new Map(cupcakes.map(c => [c.id, c]));
@@ -42,20 +48,19 @@ exports.createOrder = async (req, res) => {
       orderItems.push({ cupcake_id: cid, quantidade: qty, preco_unit_cents: unit });
     }
 
-    const pm = String(payment_method).toLowerCase(); // 'pix' | 'card'
     const { rows: orderRows } = await query(
       `INSERT INTO orders (user_id, total_cents, payment_method)
-       VALUES ($1, $2, $3) RETURNING id`,
+       VALUES ($1, $2, $3) RETURNING id, created_at, payment_method`,
       [userId, total, pm]
     );
-    const orderId = orderRows[0].id;
+    const order = orderRows[0];
 
     const values = [];
     const params = [];
     let p = 1;
     for (const oi of orderItems) {
       values.push(`($${p++}, $${p++}, $${p++}, $${p++})`);
-      params.push(orderId, oi.cupcake_id, oi.quantidade, oi.preco_unit_cents);
+      params.push(order.id, oi.cupcake_id, oi.quantidade, oi.preco_unit_cents);
     }
     await query(
       `INSERT INTO order_items (order_id, cupcake_id, quantidade, preco_unit_cents)
@@ -66,7 +71,12 @@ exports.createOrder = async (req, res) => {
     await query('COMMIT');
 
     const orderCode = code || genCode();
-    return res.status(201).json({ order_id: orderId, code: orderCode, total_cents: total, payment_method: pm });
+    return res.status(201).json({
+      order_id: order.id,
+      code: orderCode,
+      total_cents: total,
+      payment_method: order.payment_method
+    });
   } catch (err) {
     await query('ROLLBACK').catch(() => {});
     console.error('createOrder error:', err);
@@ -81,16 +91,16 @@ exports.getMyOrders = async (req, res) => {
   try {
     const { rows } = await query(
       `SELECT
-         o.id            AS order_id,
-         o.total_cents   AS total_cents,
-         o.payment_method AS payment_method,
-         o.created_at    AS created_at,
-         oi.id           AS order_item_id,
-         oi.cupcake_id   AS cupcake_id,
-         oi.quantidade   AS quantidade,
+         o.id              AS order_id,
+         o.total_cents     AS total_cents,
+         COALESCE(o.payment_method, 'pix') AS payment_method,
+         o.created_at      AS created_at,
+         oi.id             AS order_item_id,
+         oi.cupcake_id     AS cupcake_id,
+         oi.quantidade     AS quantidade,
          oi.preco_unit_cents AS preco_unit_cents,
-         c.nome          AS cupcake_nome,
-         c.image_url     AS cupcake_image_url
+         c.nome            AS cupcake_nome,
+         c.image_url       AS cupcake_image_url
        FROM orders o
        LEFT JOIN order_items oi ON oi.order_id = o.id
        LEFT JOIN cupcakes c     ON c.id = oi.cupcake_id
@@ -104,6 +114,7 @@ exports.getMyOrders = async (req, res) => {
       if (!byOrder.has(r.order_id)) {
         byOrder.set(r.order_id, {
           id: r.order_id,
+          code: genDeterministicCode(r.order_id, r.created_at),
           total_cents: Number(r.total_cents || 0),
           payment_method: r.payment_method,
           created_at: r.created_at,
