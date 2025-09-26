@@ -4,94 +4,136 @@ const { query } = require('../config/db');
 
 function signToken(user) {
   return jwt.sign(
-    { id: user.id, role: user.role || 'user' },
-    process.env.JWT_SECRET || 'devsecret',
-    { expiresIn: '7d' }
+    { id: user.id, email: user.email, is_admin: !!user.is_admin },
+    process.env.JWT_SECRET,
+    { expiresIn: '8h' }
   );
 }
 
-async function register(req, res) {
+function pickUserRow(row) {
+  return {
+    id: row.id,
+    email: row.email,
+    nome: row.nome || null,
+    telefone: row.telefone || null,
+    endereco_logradouro: row.endereco_logradouro || null,
+    endereco_numero: row.endereco_numero || null,
+    endereco_bairro: row.endereco_bairro || null,
+    endereco_cidade: row.endereco_cidade || null,
+    endereco_uf: row.endereco_uf || null,
+    endereco_cep: row.endereco_cep || null,
+    is_admin: !!row.is_admin
+  };
+}
+
+async function login(req, res) {
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ message: 'Credenciais inválidas' });
   try {
-    const { email, password, nome, telefone, endereco } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
-    }
+    const { rows } = await query('SELECT * FROM users WHERE email=$1 LIMIT 1', [email]);
+    const u = rows[0];
+    if (!u) return res.status(401).json({ message: 'Usuário ou senha inválidos' });
+    const ok = await bcrypt.compare(password, u.senha);
+    if (!ok) return res.status(401).json({ message: 'Usuário ou senha inválidos' });
+    const token = signToken(u);
+    return res.json({ token, user: pickUserRow(u) });
+  } catch (e) {
+    return res.status(500).json({ message: 'Erro no login' });
+  }
+}
 
-    const exists = await query('SELECT id FROM users WHERE email = $1', [email]);
-    if (exists.rowCount > 0) {
-      return res.status(409).json({ message: 'E-mail já cadastrado' });
-    }
-
+async function register(req, res) {
+  const { email, password, nome } = req.body || {};
+  if (!email || !password) return res.status(400).json({ message: 'Dados insuficientes' });
+  try {
+    const exists = await query('SELECT 1 FROM users WHERE email=$1 LIMIT 1', [email]);
+    if (exists.rowCount) return res.status(409).json({ message: 'E-mail já cadastrado' });
     const hash = await bcrypt.hash(password, 10);
-    const ins = await query(
-      `INSERT INTO users (email, password_hash, role, nome, telefone, endereco)
-       VALUES ($1,$2,'user',$3,$4,$5)
-       RETURNING id, email, role, nome, telefone, endereco`,
-      [email, hash, nome || null, telefone || null, endereco || null]
+    const { rows } = await query(
+      `INSERT INTO users (email, senha, nome, is_admin)
+       VALUES ($1,$2,$3,false)
+       RETURNING *`,
+      [email, hash, nome || null]
     );
-
-    const user = ins.rows[0];
-    const token = signToken(user);
-    return res.status(201).json({ token, user });
+    const u = rows[0];
+    const token = signToken(u);
+    return res.status(201).json({ token, user: pickUserRow(u) });
   } catch {
     return res.status(500).json({ message: 'Erro ao cadastrar' });
   }
 }
 
-async function login(req, res) {
+async function getMe(req, res) {
   try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
-    }
-    const db = await query(
-      `SELECT id, email, password_hash, role, nome, telefone, endereco
-         FROM users
-        WHERE email = $1`,
-      [email]
-    );
-    if (db.rowCount === 0) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
-    }
-    const u = db.rows[0];
-    const ok = await bcrypt.compare(password, u.password_hash);
-    if (!ok) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
-    }
-    const user = {
-      id: u.id, email: u.email, role: u.role,
-      nome: u.nome, telefone: u.telefone, endereco: u.endereco
-    };
-    const token = signToken(user);
-    return res.json({ token, user });
+    const { rows } = await query('SELECT * FROM users WHERE id=$1 LIMIT 1', [req.user.id]);
+    const u = rows[0];
+    if (!u) return res.status(404).json({ message: 'Não encontrado' });
+    return res.json(pickUserRow(u));
   } catch {
-    return res.status(500).json({ message: 'Erro no login' });
+    return res.status(500).json({ message: 'Erro ao carregar perfil' });
+  }
+}
+
+async function updateMe(req, res) {
+  const b = req.body || {};
+  try {
+    const { rows } = await query(
+      `UPDATE users SET
+         nome = COALESCE($2,nome),
+         telefone = COALESCE($3,telefone),
+         endereco_logradouro = COALESCE($4,endereco_logradouro),
+         endereco_numero = COALESCE($5,endereco_numero),
+         endereco_bairro = COALESCE($6,endereco_bairro),
+         endereco_cidade = COALESCE($7,endereco_cidade),
+         endereco_uf = COALESCE($8,endereco_uf),
+         endereco_cep = COALESCE($9,endereco_cep)
+       WHERE id = $1
+       RETURNING *`,
+      [
+        req.user.id,
+        b.nome ?? null,
+        b.telefone ?? null,
+        b.endereco_logradouro ?? null,
+        b.endereco_numero ?? null,
+        b.endereco_bairro ?? null,
+        b.endereco_cidade ?? null,
+        b.endereco_uf ?? null,
+        b.endereco_cep ?? null
+      ]
+    );
+    const u = rows[0];
+    return res.json(pickUserRow(u));
+  } catch {
+    return res.status(500).json({ message: 'Erro ao atualizar perfil' });
   }
 }
 
 async function changePassword(req, res) {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ message: 'Não autenticado' });
-
   const { current_password, new_password } = req.body || {};
-  if (!current_password || !new_password) {
-    return res.status(400).json({ message: 'Campos obrigatórios: current_password, new_password' });
-  }
-
+  if (!new_password) return res.status(400).json({ message: 'Nova senha ausente' });
   try {
-    const db = await query('SELECT password_hash FROM users WHERE id = $1', [userId]);
-    if (db.rowCount === 0) return res.status(404).json({ message: 'Usuário não encontrado' });
-
-    const ok = await bcrypt.compare(current_password, db.rows[0].password_hash);
-    if (!ok) return res.status(401).json({ message: 'Senha atual incorreta' });
-
+    const { rows } = await query('SELECT id, senha FROM users WHERE id=$1', [req.user.id]);
+    const u = rows[0];
+    if (!u) return res.status(404).json({ message: 'Não encontrado' });
+    if (current_password) {
+      const ok = await bcrypt.compare(current_password, u.senha);
+      if (!ok) return res.status(401).json({ message: 'Senha atual inválida' });
+    }
     const hash = await bcrypt.hash(new_password, 10);
-    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, userId]);
-
-    return res.status(204).send();
+    await query('UPDATE users SET senha=$2 WHERE id=$1', [req.user.id, hash]);
+    return res.json({ ok: true });
   } catch {
     return res.status(500).json({ message: 'Erro ao alterar senha' });
   }
 }
 
-module.exports = { register, login, changePassword };
+async function deleteMe(req, res) {
+  try {
+    await query('DELETE FROM users WHERE id=$1', [req.user.id]);
+    return res.json({ ok: true });
+  } catch {
+    return res.status(500).json({ message: 'Erro ao remover conta' });
+  }
+}
+
+module.exports = { login, register, getMe, updateMe, changePassword, deleteMe };
