@@ -1,10 +1,10 @@
+// backend/src/routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
-
 const { requireAuth } = require('../middleware/auth');
-const ctrl = require('../controllers/orderController');
+const { createOrder, listMyOrders } = require('../controllers/orderController');
 
-router.post('/orders', requireAuth, ctrl.createOrder);
-router.get('/orders/mine', requireAuth, ctrl.listMyOrders);
+router.post('/', requireAuth, createOrder);
+router.get('/my', requireAuth, listMyOrders);
 
 module.exports = router;

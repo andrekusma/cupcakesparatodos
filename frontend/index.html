@@ -30,9 +30,11 @@
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
 
+  <!-- Cabeçalho -->
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
+        <!-- Ícone minicupcake (SVG) -->
         <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
           <defs>
             <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
@@ -67,11 +69,11 @@
         <button id="openCart" class="btn btn-secondary icon-btn" title="Carrinho">🛒
           <span id="cartQty" class="badge hidden">0</span>
         </button>
-
         <div id="userMenuWrap" class="relative hidden">
           <button id="userMenuBtn" class="btn btn-secondary"></button>
           <div id="userMenu" class="menu hidden">
             <button id="openProfile" type="button">Perfil</button>
+            <button id="openMyOrders" type="button">Meus pedidos</button>
             <button id="logoutFromMenu" type="button">Sair</button>
           </div>
         </div>
@@ -79,6 +81,7 @@
     </div>
   </header>
 
+  <!-- Área de busca -->
   <section class="max-w-6xl mx-auto px-4 mt-6">
     <div class="glass rounded-2xl p-5">
       <div class="flex flex-col md:flex-row md:items-end gap-3">
@@ -94,7 +97,9 @@
     </div>
   </section>
 
+  <!-- Conteúdo principal -->
   <main class="max-w-6xl mx-auto px-4 py-6 grid gap-6 md:grid-cols-3">
+    <!-- Catálogo -->
     <section class="md:col-span-2">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-xl font-bold">Catálogo</h2>
@@ -104,6 +109,7 @@
       <p id="empty" class="hidden text-center text-gray-500 py-8">Nenhum cupcake encontrado.</p>
     </section>
 
+    <!-- Área administrativa -->
     <aside id="adminPanel" class="card p-5 h-fit hidden">
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-lg font-bold">Área administrativa</h3>
@@ -145,6 +151,7 @@
     </aside>
   </main>
 
+  <!-- Modal: configuração de API -->
   <dialog id="settings" class="backdrop:bg-black/30 rounded-2xl w-full max-w-lg p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -157,12 +164,11 @@
           <input id="apiBase" class="field" placeholder="https://cupcakesparatodos.onrender.com" />
         </div>
         <div class="text-xs text-gray-600">
+          Endpoints esperados:
           <ul class="list-disc ml-5">
-            <li><code>POST /api/auth/login</code>, <code>POST /api/auth/register</code>, <code>GET /api/auth/me</code>, <code>PUT /api/auth/me</code></li>
-            <li><code>GET /api/cupcakes</code></li>
-            <li><code>POST /api/admin/cupcakes</code></li>
-            <li><code>DELETE /api/admin/cupcakes/:id</code></li>
-            <li><code>POST /api/orders</code></li>
+            <li>Auth: <code>/api/auth/login</code>, <code>/api/auth/register</code>, <code>/api/auth/me</code>, <code>PUT /api/auth/me</code>, <code>POST /api/auth/change-password</code>, <code>DELETE /api/auth/me</code></li>
+            <li>Cupcakes: <code>GET /api/cupcakes</code>, <code>POST /api/admin/cupcakes</code>, <code>DELETE /api/admin/cupcakes/:id</code></li>
+            <li>Pedidos: <code>POST /api/orders</code>, <code>GET /api/orders/my</code></li>
           </ul>
         </div>
         <div class="flex gap-2">
@@ -173,6 +179,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: autenticação -->
   <dialog id="auth" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -197,6 +204,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: cadastro -->
   <dialog id="register" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -233,6 +241,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: perfil -->
   <dialog id="profile" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl" id="profileForm">
       <div class="flex items-center justify-between mb-3">
@@ -254,12 +263,45 @@
         </div>
       </div>
       <p id="pfError" class="hidden text-sm text-red-600 mt-2"></p>
-      <div class="mt-4 flex justify-end">
+      <div class="mt-4 flex justify-between items-center">
         <button id="btnSaveProfile" type="button" class="btn btn-primary">Salvar alterações</button>
+        <div class="flex gap-2">
+          <button id="btnChangePassOpen" type="button" class="btn btn-secondary">Alterar senha</button>
+          <button id="btnDeleteAccount" type="button" class="btn btn-danger">Remover conta</button>
+        </div>
       </div>
     </form>
   </dialog>
 
+  <!-- Modal: alterar senha -->
+  <dialog id="changePassModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl" id="changePassForm" novalidate>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Alterar senha</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfCurPass">Senha atual</label>
+          <input id="pfCurPass" type="password" class="field" placeholder="Senha atual">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfNewPass">Nova senha</label>
+          <input id="pfNewPass" type="password" class="field" placeholder="Nova senha">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfNewPass2">Confirmar nova senha</label>
+          <input id="pfNewPass2" type="password" class="field" placeholder="Confirmar nova senha">
+        </div>
+      </div>
+      <p id="cpError" class="hidden text-sm text-red-600 mt-2"></p>
+      <div class="mt-4 flex justify-end">
+        <button id="btnChangePass" type="button" class="btn btn-primary">Salvar nova senha</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: carrinho -->
   <dialog id="cartModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -274,6 +316,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: escolher pagamento -->
   <dialog id="paymentModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -293,6 +336,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: PIX -->
   <dialog id="pixModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -313,6 +357,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: sucesso cartão -->
   <dialog id="successModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -332,6 +377,7 @@
     </form>
   </dialog>
 
+  <!-- Modal: cartão -->
   <dialog id="cardModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl" id="cardFormEl" novalidate>
       <div class="flex items-center justify-between mb-3">
@@ -365,6 +411,18 @@
     </form>
   </dialog>
 
+  <!-- Modal: meus pedidos -->
+  <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-3xl p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Meus pedidos</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div id="ordersWrap" class="space-y-3 max-h-[60vh] overflow-auto"></div>
+    </form>
+  </dialog>
+
+  <!-- Toast -->
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
     <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
@@ -377,9 +435,7 @@
 
     const $ = (s)=>document.querySelector(s);
     const $$ = (s)=>Array.from(document.querySelectorAll(s));
-
     function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2400); }
-
     const isAdmin = ()=> !!(state.user && state.user.role==='admin');
     const isLogged = ()=> !!(state.token && state.user);
     const authHeader = ()=> state.token ? { Authorization:`Bearer ${state.token}` } : {};
@@ -402,14 +458,60 @@
     async function apiRegister(payload){ const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no cadastro (${r.status})`); return data; }
     async function apiGetMe(){ const r = await fetch(`${getBase()}/api/auth/me`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Perfil (${r.status})`); return data; }
     async function apiUpdateMe(payload){ const r = await fetch(`${getBase()}/api/auth/me`, { method:'PUT', headers:{ 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(payload) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Atualizar perfil (${r.status})`); return data; }
+    async function apiChangePassword({ current_password, new_password }){ const r = await fetch(`${getBase()}/api/auth/change-password`, { method:'POST', headers:{ 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ current_password, new_password }) }); if(!r.ok){ const d=await parseJsonSafe(r); throw new Error(d.message||`Alterar senha (${r.status})`);} return true; }
+    async function apiDeleteMe(){ const r = await fetch(`${getBase()}/api/auth/me`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok){ const d=await parseJsonSafe(r); throw new Error(d.message||`Remover conta (${r.status})`);} return true; }
     async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error(`Cupcakes (${r.status})`); return parseJsonSafe(r); }
     async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
     async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
     async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
+    async function apiMyOrders(){ const r = await fetch(`${getBase()}/api/orders/my`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedidos (${r.status})`); return data; }
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
-    function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
-    function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`; if (!items.length){ $('#empty').classList.remove('hidden'); return; } $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
+    function normalize(item){
+      const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path;
+      return {
+        id: item.id,
+        name: item.nome || item.name,
+        description: (item.descricao ?? item.description ?? ''),
+        price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100),
+        image: fullURL(imageRaw)
+      };
+    }
+    function renderList(items){
+      const grid = $('#grid'); grid.innerHTML = '';
+      $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`;
+      if (!items.length){ $('#empty').classList.remove('hidden'); return; }
+      $('#empty').classList.add('hidden');
+
+      items.map(normalize).forEach((c) => {
+        const el = document.createElement('article');
+        el.className = 'card flex flex-col';
+        el.innerHTML = `
+          <img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50">
+          <div class="p-4 flex-1 flex flex-col gap-2">
+            <h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3>
+            <p class="text-sm text-gray-700">${c.description || 'Sem descrição.'}</p>
+            <div class="mt-auto flex items-center justify-between">
+              <span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span>
+              <div class="flex gap-2">
+                ${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}
+                <button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button>
+              </div>
+            </div>
+          </div>`;
+        grid.appendChild(el);
+
+        el.querySelector('[data-add]').onclick = ()=> addToCart(c);
+        if (isAdmin()){
+          const del = el.querySelector('[data-del]');
+          if (del) del.onclick = async ()=>{
+            if (!confirm('Confirma excluir este cupcake?')) return;
+            try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); }
+            catch(e){ toast(e.message||'Erro ao excluir', false); }
+          };
+        }
+      });
+    }
 
     async function load(){ try{ renderSkeleton(); const data = await apiList(); const arr = Array.isArray(data) ? data : (data.items || []); state.items = arr; applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
     function applyFilter(){ const q = $('#search').value.trim().toLowerCase(); const filtered = !q ? state.items : state.items.filter(x => { const n = (x.nome||x.name||'').toLowerCase(); const d = (x.descricao||x.description||'').toLowerCase(); return n.includes(q) || d.includes(q); }); state.filtered = filtered; renderList(filtered); }
@@ -419,34 +521,10 @@
     function luhn(card){ const s=onlyDigits(card); let sum=0,alt=false; for(let i=s.length-1;i>=0;i--){ let n=+s[i]; if(alt){ n*=2; if(n>9) n-=9; } sum+=n; alt=!alt; } return (sum%10)===0 && s.length>=13 && s.length<=19; }
     function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
     function validCvc(cvc){ const d=onlyDigits(cvc); return d.length===3 || d.length===4; }
-
     function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: Number(i.id), quantidade: Number(i.qty||1) })); }
-    function openCheckout(){
-      if(!isLogged()) { toast('Entre para finalizar a compra', false); return; }
-      const cart = loadCart();
-      const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0);
-      if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; }
-      $('#paymentModal').showModal();
-    }
-
-    async function openPix(){
-      const code = genOrderCode();
-      $('#pixCode').textContent = code;
-      try {
-        const items = cartToOrderItems();
-        if(!items.length) throw new Error('Carrinho vazio');
-        await apiCreateOrder({ items, payment_method: 'pix', code });
-        clearCart(); updateCartBadge();
-        $('#paymentModal').close(); $('#pixModal').showModal();
-        toast('Pedido criado (PIX)');
-      } catch(e) {
-        toast(e.message || 'Erro ao criar pedido', false);
-      }
-    }
-
-    function openCard(){
-      $('#paymentModal').close(); $('#cardModal').showModal();
-    }
+    function openCheckout(){ if(!isLogged()) { toast('Entre para finalizar a compra', false); return; } const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
+    async function openPix(){ const code = genOrderCode(); $('#pixCode').textContent = code; try { const items = cartToOrderItems(); if(!items.length) throw new Error('Carrinho vazio'); await apiCreateOrder({ items, payment_method: 'pix', code }); clearCart(); updateCartBadge(); $('#paymentModal').close(); $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e){ toast(e.message || 'Erro ao criar pedido', false); } }
+    function openCard(){ $('#paymentModal').close(); $('#cardModal').showModal(); }
 
     function setUpPaymentUI(){
       $('#btnCheckout').onclick = openCheckout;
@@ -458,12 +536,13 @@
       function maskNumber(v){ const d=onlyDigitsLocal(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); }
       function maskExp(v){ const d=onlyDigitsLocal(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); }
       function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } }
-      ccNumber.addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
-      ccExp.addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
-      ccCvc.addEventListener('input', validate);
-      ccName.addEventListener('input', validate);
+      $('#ccNumber').addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
+      $('#ccExp').addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
+      $('#ccCvc').addEventListener('input', validate);
+      $('#ccName').addEventListener('input', validate);
 
-      btnFinish.onclick = async ()=>{
+      $('#btnFinishCard').onclick = async ()=>{
+        const btnFinish = $('#btnFinishCard');
         if(btnFinish.disabled) return;
         const code = genOrderCode();
         try {
@@ -481,21 +560,49 @@
       };
     }
 
-    function safeName(u){
-      return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário';
-    }
+    function safeName(u){ return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário'; }
+    function toggleMenu(show){ const menu = $('#userMenu'); if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden'); }
 
-    function toggleMenu(show){
-      const menu = $('#userMenu');
-      if (show) menu.classList.remove('hidden');
-      else menu.classList.add('hidden');
+    function renderOrders(list){
+      const el = $('#ordersWrap'); el.innerHTML = '';
+      if (!Array.isArray(list) || list.length === 0){
+        el.innerHTML = '<p class="text-sm text-gray-600">Você ainda não tem pedidos.</p>';
+        return;
+      }
+      list.forEach((o) => {
+        const total = Number(o.total_cents || 0)/100;
+        const card = document.createElement('article');
+        card.className = 'card p-4';
+        const created = new Date(o.created_at);
+        const dt = created.toLocaleString('pt-BR');
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="font-semibold">Pedido <span class="text-pink-600">${o.code}</span></div>
+            <div class="text-sm text-gray-600">${dt}</div>
+          </div>
+          <div class="mt-2 text-sm">Pagamento: <b>${o.payment_method==='pix' ? 'PIX' : 'Cartão'}</b></div>
+          <div class="mt-2">
+            ${(o.items||[]).map(it => `
+              <div class="flex items-center gap-3 py-2 border-b last:border-b-0">
+                <img src="${fullURL(it.image_url)}" class="w-12 h-12 object-cover rounded-md border" alt="">
+                <div class="flex-1">
+                  <div class="font-medium">${it.nome}</div>
+                  <div class="text-sm text-gray-600">Qtd: ${it.quantidade} • ${currency(Number(it.price_cents||0)/100)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="mt-3 font-bold text-right">Total: ${currency(total)}</div>
+        `;
+        el.appendChild(card);
+      });
     }
 
     function setAuthUI(){
       if (isLogged()){
         $('#openAuth').classList.add('hidden');
         $('#openRegister').classList.add('hidden');
-        $('#btnLogout').classList.add('hidden'); // escondido em favor do menu
+        $('#btnLogout').classList.add('hidden');
         $('#userMenuWrap').classList.remove('hidden');
         $('#userMenuBtn').textContent = safeName(state.user);
         if (isAdmin()){
@@ -518,14 +625,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Config
       $('#openSettings').onclick = ()=> $('#settings').showModal();
       $('#apiBase').value = getBase();
       $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
       $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
 
-      $('#openAuth').onclick = ()=> $('#auth').showModal();
-      $('#openRegister').onclick = ()=> $('#register').showModal();
-
+      // Menu usuário
       $('#userMenuBtn').onclick = (e)=>{ e.stopPropagation(); toggleMenu($('#userMenu').classList.contains('hidden')); };
       document.addEventListener('click', ()=> toggleMenu(false));
       $('#openProfile').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false);
@@ -537,8 +643,20 @@
           $('#profile').showModal();
         } catch(e){ toast(e.message, false); }
       };
+      $('#openMyOrders').onclick = async (e)=>{
+        e.stopPropagation(); toggleMenu(false);
+        if (!isLogged()){ toast('Entre para ver seus pedidos', false); return; }
+        try{
+          const data = await apiMyOrders();
+          renderOrders(data);
+          $('#ordersModal').showModal();
+        } catch(e){ toast(e.message || 'Erro ao carregar pedidos', false); }
+      };
       $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
 
+      // Auth
+      $('#openAuth').onclick = ()=> $('#auth').showModal();
+      $('#openRegister').onclick = ()=> $('#register').showModal();
       $('#doLogin').onclick = async ()=>{
         const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden');
         try{
@@ -549,7 +667,6 @@
           $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
-
       $('#doRegister').onclick = async ()=>{
         const payload = {
           email: $('#regEmail').value.trim(),
@@ -567,7 +684,6 @@
           $('#register').close(); setAuthUI(); toast('Conta criada'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
-
       $('#btnLogout').onclick = ()=>{
         localStorage.removeItem(STORAGE.token);
         localStorage.removeItem(STORAGE.user);
@@ -575,6 +691,7 @@
         setAuthUI(); toast('Sessão encerrada'); load();
       };
 
+      // Perfil
       $('#btnSaveProfile').onclick = async ()=>{
         const err = $('#pfError'); err.classList.add('hidden');
         try{
@@ -586,17 +703,54 @@
           const me = await apiUpdateMe(payload);
           state.user = { ...state.user, ...me };
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#userMenuBtn').textContent = safeName(state.user);
+          $('#userMenuBtn').textContent = (state.user?.nome || state.user?.email || 'Usuário');
           $('#profile').close();
           toast('Perfil atualizado');
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
+      // Alterar senha
+      $('#btnChangePassOpen').onclick = ()=> { $('#changePassModal').showModal(); };
+      $('#btnChangePass').onclick = async ()=>{
+        const cur = $('#pfCurPass').value || '';
+        const n1  = $('#pfNewPass').value || '';
+        const n2  = $('#pfNewPass2').value || '';
+        const err = $('#cpError'); err.classList.add('hidden');
+        if (!cur || !n1 || !n2){ err.textContent='Preencher todos os campos de senha'; err.classList.remove('hidden'); return; }
+        if (n1.length < 6){ err.textContent='Nova senha deve ter ao menos 6 caracteres'; err.classList.remove('hidden'); return; }
+        if (n1 !== n2){ err.textContent='Nova senha e confirmação não conferem'; err.classList.remove('hidden'); return; }
+        try{
+          await apiChangePassword({ current_password: cur, new_password: n1 });
+          $('#pfCurPass').value = ''; $('#pfNewPass').value=''; $('#pfNewPass2').value='';
+          $('#changePassModal').close(); $('#profile').close();
+          toast('Senha alterada. Faça login novamente.');
+          localStorage.removeItem(STORAGE.token);
+          localStorage.removeItem(STORAGE.user);
+          state.token = null; state.user = null;
+          setAuthUI();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
 
-      $('#search').addEventListener('input', applyFilter);
-      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
-      $('#btnRefresh').onclick = load;
+      // Remover conta
+      $('#btnDeleteAccount').onclick = async ()=>{
+        const err = $('#pfError'); err.classList.add('hidden');
+        if (!confirm('Confirma remover sua conta? Esta ação é irreversível.')) return;
+        try{
+          await apiDeleteMe();
+          toast('Conta removida');
+          localStorage.removeItem(STORAGE.token);
+          localStorage.removeItem(STORAGE.user);
+          localStorage.removeItem(cartKey());
+          state.token = null; state.user = null;
+          $('#profile').close();
+          setAuthUI();
+          load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
+
+      // Carrinho e criação/admin
+      $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
+      $('#btnCheckout').onclick = openCheckout;
 
       const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
       drop?.addEventListener('click', ()=> fileInput.click());
@@ -621,45 +775,17 @@
         }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
       });
 
-      function setUpPaymentUI(){
-        $('#btnCheckout').onclick = openCheckout;
-        $('#payPix').onclick = openPix;
-        $('#payCard').onclick = openCard;
+      // Busca
+      $('#search').addEventListener('input', applyFilter);
+      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
+      $('#btnRefresh').onclick = load;
 
-        const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError');
-        function onlyDigitsLocal(v){ return String(v||'').replace(/\D+/g,''); }
-        function maskNumber(v){ const d=onlyDigitsLocal(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); }
-        function maskExp(v){ const d=onlyDigitsLocal(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); }
-        function luhn(card){ const s=onlyDigitsLocal(card); let sum=0,alt=false; for(let i=s.length-1;i>=0;i--){ let n=+s[i]; if(alt){ n*=2; if(n>9) n-=9; } sum+=n; alt=!alt; } return (sum%10)===0 && s.length>=13 && s.length<=19; }
-        function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
-        function validCvc(cvc){ const d=onlyDigitsLocal(cvc); return d.length===3 || d.length===4; }
-        function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } }
-        $('#ccNumber').addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
-        $('#ccExp').addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
-        $('#ccCvc').addEventListener('input', validate);
-        $('#ccName').addEventListener('input', validate);
-
-        $('#btnFinishCard').onclick = async ()=>{
-          const btnFinish = $('#btnFinishCard');
-          if(btnFinish.disabled) return;
-          const code = genOrderCode();
-          try {
-            const items = cartToOrderItems();
-            if(!items.length) throw new Error('Carrinho vazio');
-            await apiCreateOrder({ items, payment_method: 'card', code });
-            clearCart(); updateCartBadge();
-            $('#cardModal').close();
-            $('#successCode').textContent = code;
-            $('#successModal').showModal();
-            toast('Pedido criado (Cartão)');
-          } catch(e) {
-            toast(e.message || 'Erro ao criar pedido', false);
-          }
-        };
-      }
+      // Pagamento UI
       setUpPaymentUI();
 
-      setAuthUI(); load();
+      // Sessão e dados
+      setAuthUI();
+      load();
     });
   </script>
 </body>

@@ -1,31 +1,34 @@
-// backend/src/index.js
 const express = require('express');
 const cors = require('cors');
+const dotenv = require('dotenv');
 const path = require('path');
 
+dotenv.config();
+
 const authRoutes = require('./routes/authRoutes');
-const cupcakeRoutes = require('./routes/cupcakeRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-let orderRoutes = null;
-try { orderRoutes = require('./routes/orderRoutes'); } catch {}
+const cupcakeRoutes = require('./routes/cupcakeRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// >>> usar o mesmo diretório que o multer usa (UPLOAD_DIR)
-const STATIC_UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads');
-app.use('/uploads', express.static(STATIC_UPLOAD_DIR));
+// arquivos estáticos de upload
+const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
+app.use('/uploads', express.static(uploadDir));
 
-// rotas
-app.use('/api', authRoutes);
-app.use('/api', cupcakeRoutes);
-app.use('/api', adminRoutes);
-if (orderRoutes) app.use('/api', orderRoutes);
+// rotas da API
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/cupcakes', cupcakeRoutes);
+app.use('/api/orders', orderRoutes);
 
-// health
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
+// rota simples de verificação
+app.get('/', (_req, res) => {
+  res.send('API Cupcakes para Todos está rodando!');
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('API on port', PORT, 'uploads from', STATIC_UPLOAD_DIR));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
