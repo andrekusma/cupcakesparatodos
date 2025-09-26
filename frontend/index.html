@@ -30,12 +30,10 @@
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
 
-  <!-- Cabeçalho -->
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <!-- Ícone minicupcake (SVG) -->
-        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
+      <div class="flex items-center gap-3 select-none">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10">
           <defs>
             <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#ffd6e7"/>
@@ -59,7 +57,7 @@
           <path d="M17 21c0-2.6 2.6-4.4 5.1-3.7" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
           <path d="M34 29c2.8 0 5.8-2.7 5.8-6 0-2.3-1.5-4.3-4-5 0-3.3-2.7-6-6-6-1.3 0-2.6.4-3.7 1.1 3.2.6 5.6 3.4 5.6 6.7 0 3.7-3 6.8-6.8 6.8H34z" fill="rgba(0,0,0,0.05)"/>
         </svg>
-        <h1 class="text-lg font-extrabold leading-tight select-none">Cupcakes para Todos</h1>
+        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2 relative">
         <button id="openSettings" class="btn btn-secondary hidden" title="Configurar API">Configurações</button>
@@ -81,7 +79,6 @@
     </div>
   </header>
 
-  <!-- Área de busca -->
   <section class="max-w-6xl mx-auto px-4 mt-6">
     <div class="glass rounded-2xl p-5">
       <div class="flex flex-col md:flex-row md:items-end gap-3">
@@ -97,9 +94,7 @@
     </div>
   </section>
 
-  <!-- Conteúdo principal -->
   <main class="max-w-6xl mx-auto px-4 py-6 grid gap-6 md:grid-cols-3">
-    <!-- Catálogo -->
     <section class="md:col-span-2">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-xl font-bold">Catálogo</h2>
@@ -109,7 +104,6 @@
       <p id="empty" class="hidden text-center text-gray-500 py-8">Nenhum cupcake encontrado.</p>
     </section>
 
-    <!-- Área administrativa -->
     <aside id="adminPanel" class="card p-5 h-fit hidden">
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-lg font-bold">Área administrativa</h3>
@@ -151,7 +145,6 @@
     </aside>
   </main>
 
-  <!-- Modal: configuração de API -->
   <dialog id="settings" class="backdrop:bg-black/30 rounded-2xl w-full max-w-lg p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -179,7 +172,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: autenticação -->
   <dialog id="auth" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -204,7 +196,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: cadastro -->
   <dialog id="register" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -241,7 +232,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: perfil -->
   <dialog id="profile" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl" id="profileForm">
       <div class="flex items-center justify-between mb-3">
@@ -273,7 +263,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: alterar senha -->
   <dialog id="changePassModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl" id="changePassForm" novalidate>
       <div class="flex items-center justify-between mb-3">
@@ -301,7 +290,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: carrinho -->
   <dialog id="cartModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -316,7 +304,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: escolher pagamento -->
   <dialog id="paymentModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -336,7 +323,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: PIX -->
   <dialog id="pixModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -357,7 +343,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: sucesso cartão -->
   <dialog id="successModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -377,7 +362,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: cartão -->
   <dialog id="cardModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
     <form method="dialog" class="glass p-5 rounded-2xl" id="cardFormEl" novalidate>
       <div class="flex items-center justify-between mb-3">
@@ -411,7 +395,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: meus pedidos -->
   <dialog id="ordersModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-3xl p-0">
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -422,14 +405,14 @@
     </form>
   </dialog>
 
-  <!-- Toast -->
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
     <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
 
   <script>
     const STORAGE = { base:'API_BASE_URL', token:'JWT_TOKEN', user:'AUTH_USER' };
-    const getBase = () => localStorage.getItem(STORAGE.base) || 'http://localhost:3000';
+    // Default atualizado: Render
+    const getBase = () => localStorage.getItem(STORAGE.base) || 'https://cupcakesparatodos.onrender.com';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items: [], filtered: [] };
 
@@ -625,13 +608,11 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Config
       $('#openSettings').onclick = ()=> $('#settings').showModal();
       $('#apiBase').value = getBase();
       $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
       $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
 
-      // Menu usuário
       $('#userMenuBtn').onclick = (e)=>{ e.stopPropagation(); toggleMenu($('#userMenu').classList.contains('hidden')); };
       document.addEventListener('click', ()=> toggleMenu(false));
       $('#openProfile').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false);
@@ -654,7 +635,6 @@
       };
       $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
 
-      // Auth
       $('#openAuth').onclick = ()=> $('#auth').showModal();
       $('#openRegister').onclick = ()=> $('#register').showModal();
       $('#doLogin').onclick = async ()=>{
@@ -691,7 +671,6 @@
         setAuthUI(); toast('Sessão encerrada'); load();
       };
 
-      // Perfil
       $('#btnSaveProfile').onclick = async ()=>{
         const err = $('#pfError'); err.classList.add('hidden');
         try{
@@ -709,7 +688,6 @@
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      // Alterar senha
       $('#btnChangePassOpen').onclick = ()=> { $('#changePassModal').showModal(); };
       $('#btnChangePass').onclick = async ()=>{
         const cur = $('#pfCurPass').value || '';
@@ -731,7 +709,6 @@
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      // Remover conta
       $('#btnDeleteAccount').onclick = async ()=>{
         const err = $('#pfError'); err.classList.add('hidden');
         if (!confirm('Confirma remover sua conta? Esta ação é irreversível.')) return;
@@ -748,9 +725,7 @@
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      // Carrinho e criação/admin
       $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
-      $('#btnCheckout').onclick = openCheckout;
 
       const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
       drop?.addEventListener('click', ()=> fileInput.click());
@@ -775,15 +750,11 @@
         }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
       });
 
-      // Busca
       $('#search').addEventListener('input', applyFilter);
       $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
       $('#btnRefresh').onclick = load;
 
-      // Pagamento UI
       setUpPaymentUI();
-
-      // Sessão e dados
       setAuthUI();
       load();
     });
