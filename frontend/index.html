@@ -37,7 +37,6 @@
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- Ícone cupcake SVG -->
         <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
           <defs>
             <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
@@ -154,7 +153,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Configurações do frontend</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('settings').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -182,7 +181,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Entrar</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('auth').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -191,11 +190,11 @@
         </div>
         <div>
           <label class="text-sm font-medium text-gray-700" for="password">Senha</label>
-        <input id="password" type="password" required class="field" placeholder="••••••••" />
+          <input id="password" type="password" required class="field" placeholder="••••••••" />
         </div>
         <div class="flex gap-2">
           <button id="doLogin" type="button" class="btn btn-primary">Entrar</button>
-          <button value="cancel" class="btn btn-secondary">Cancelar</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('auth').close()">Cancelar</button>
         </div>
         <p id="authError" class="hidden text-sm text-red-600"></p>
       </div>
@@ -206,7 +205,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Criar conta</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('register').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -231,7 +230,7 @@
         </div>
         <div class="flex gap-2">
           <button id="doRegister" type="button" class="btn btn-primary">Cadastrar</button>
-          <button value="cancel" class="btn btn-secondary">Cancelar</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('register').close()">Cancelar</button>
         </div>
         <p id="regError" class="hidden text-sm text-red-600"></p>
       </div>
@@ -242,7 +241,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl" id="profileForm">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Seu perfil</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('profile').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -273,7 +272,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl" id="changePassForm" novalidate>
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Alterar senha</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('changePassModal').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -300,7 +299,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Seu carrinho</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('cartModal').close()">Fechar</button>
       </div>
       <div id="cartItems" class="space-y-3 max-h-[50vh] overflow-auto"></div>
       <div class="mt-4 flex items-center justify-between">
@@ -314,7 +313,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Forma de pagamento</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('paymentModal').close()">Fechar</button>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <button type="button" id="payPix" class="btn btn-secondary flex-col py-6">
@@ -333,7 +332,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Pagamento via PIX</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('pixModal').close()">Fechar</button>
       </div>
       <p class="text-sm text-gray-700 mb-3">
         Para confirmar sua compra, transfira o valor da sua compra para nosso PIX:
@@ -353,7 +352,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Compra concluída</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('successModal').close()">Fechar</button>
       </div>
       <p class="text-sm text-gray-700 mb-3">
         Pagamento efetuado, agradecemos a preferência. Logo você receberá seus deliciosos cupcakes em casa.
@@ -372,7 +371,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl" id="cardFormEl" novalidate>
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Cartão de crédito</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('cardModal').close()">Fechar</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -405,7 +404,7 @@
     <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Meus pedidos</h3>
-        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+        <button type="button" class="btn btn-secondary" aria-label="Fechar" onclick="document.getElementById('ordersModal').close()">Fechar</button>
       </div>
       <div id="ordersWrap" class="space-y-3 max-h-[60vh] overflow-auto">
         <div id="ordersEmpty" class="text-center text-gray-500 hidden">Nenhum pedido encontrado.</div>
@@ -429,7 +428,22 @@
 
     const $ = (s)=>document.querySelector(s);
     const $$ = (s)=>Array.from(document.querySelectorAll(s));
-    function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2400); }
+    function toast(msg, ok=true){
+      let box = $('#toast');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'toast';
+        box.className = 'fixed bottom-4 right-4 z-[60]';
+        box.innerHTML = '<div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>';
+        document.body.appendChild(box);
+      }
+      const inner = box.firstElementChild || box.appendChild(document.createElement('div'));
+      inner.textContent = msg;
+      inner.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`;
+      box.classList.remove('hidden');
+      clearTimeout(box._t);
+      box._t = setTimeout(()=> box.classList.add('hidden'), 2400);
+    }
     const isAdmin = ()=> !!(state.user && state.user.role==='admin');
     const isLogged = ()=> !!(state.token && state.user);
     const authHeader = ()=> state.token ? { Authorization:`Bearer ${state.token}` } : {};
@@ -441,11 +455,11 @@
     function saveCart(arr){ localStorage.setItem(cartKey(), JSON.stringify(arr)); renderCart(); }
     function clearCart(){ localStorage.removeItem(cartKey()); renderCart(); }
     function cartQty(){ return loadCart().reduce((s,i)=> s+Number(i.qty||1), 0); }
-    function updateCartBadge(){ const q = cartQty(); const b = $('#cartQty'); if (q>0){ b.textContent = q; b.classList.remove('hidden'); } else { b.classList.add('hidden'); } }
+    function updateCartBadge(){ const q = cartQty(); const b = $('#cartQty'); if (!b) return; if (q>0){ b.textContent = q; b.classList.remove('hidden'); } else { b.classList.add('hidden'); } }
     function addToCart(item){ if (!isLogged()) return toast('Entre para usar o carrinho', false); const cart = loadCart(); const idx = cart.findIndex(x=> x.id===item.id); if (idx>=0) cart[idx].qty += 1; else cart.push({ id:item.id, name:item.name, price_cents:item.price_cents, image:item.image, qty:1 }); saveCart(cart); updateCartBadge(); toast('Adicionado ao carrinho'); }
     function removeFromCart(id){ const cart = loadCart().filter(x=> x.id!==id); saveCart(cart); updateCartBadge(); }
     function changeQty(id, delta){ const cart = loadCart(); const i = cart.findIndex(x=>x.id===id); if (i<0) return; cart[i].qty = Math.max(1, (cart[i].qty||1)+delta); saveCart(cart); updateCartBadge(); }
-    function renderCart(){ const wrap = $('#cartItems'); if(!wrap) return; const cart = loadCart(); wrap.innerHTML = ''; let total = 0; cart.forEach(it=>{ const price = (Number(it.price_cents||0)/100); total += price * Number(it.qty||1); const row = document.createElement('div'); row.className = 'card p-3 flex items-center gap-3'; row.innerHTML = `<img src="${it.image||''}" class="w-16 h-16 object-cover rounded-lg border" alt=""><div class="flex-1"><div class="font-semibold">${it.name||'Cupcake'}</div><div class="text-sm text-gray-600">${currency(price)}</div></div><div class="flex items-center gap-2"><button class="btn btn-secondary" data-dec="${it.id}">-</button><span class="w-8 text-center">${it.qty||1}</span><button class="btn btn-secondary" data-inc="${it.id}">+</button><button class="btn btn-danger" data-rem="${it.id}">Remover</button></div>`; wrap.appendChild(row); }); $('#cartTotal').textContent = currency(total); $$('#cartItems [data-inc]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-inc')), +1)); $$('#cartItems [data-dec]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-dec')), -1)); $$('#cartItems [data-rem]').forEach(b=> b.onclick = ()=> removeFromCart(Number(b.getAttribute('data-rem')))); }
+    function renderCart(){ const wrap = $('#cartItems'); if(!wrap) return; const cart = loadCart(); wrap.innerHTML = ''; let total = 0; cart.forEach(it=>{ const price = (Number(it.price_cents||0)/100); total += price * Number(it.qty||1); const row = document.createElement('div'); row.className = 'card p-3 flex items-center gap-3'; row.innerHTML = `<img src="${it.image||''}" class="w-16 h-16 object-cover rounded-lg border" alt=""><div class="flex-1"><div class="font-semibold">${it.name||'Cupcake'}</div><div class="text-sm text-gray-600">${currency(price)}</div></div><div class="flex items-center gap-2"><button class="btn btn-secondary" data-dec="${it.id}">-</button><span class="w-8 text-center">${it.qty||1}</span><button class="btn btn-secondary" data-inc="${it.id}">+</button><button class="btn btn-danger" data-rem="${it.id}">Remover</button></div>`; wrap.appendChild(row); }); $('#cartTotal') && ($('#cartTotal').textContent = currency(total)); $$('#cartItems [data-inc]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-inc')), +1)); $$('#cartItems [data-dec]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-dec')), -1)); $$('#cartItems [data-rem]').forEach(b=> b.onclick = ()=> removeFromCart(Number(b.getAttribute('data-rem')))); }
 
     async function parseJsonSafe(r){ const t = await r.text(); try{ return JSON.parse(t); } catch{ return { message: t || 'Erro' }; } }
     async function apiLogin(email, password){ const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no login (${r.status})`); return data; }
@@ -462,7 +476,7 @@
 
     function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
     function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
-    function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`; if (!items.length){ $('#empty').classList.remove('hidden'); return; } $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
+    function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip') && ($('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`); if (!items.length){ $('#empty') && $('#empty').classList.remove('hidden'); return; } $('#empty') && $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
 
     async function load(){ try{ renderSkeleton(); const data = await apiList(); const arr = Array.isArray(data) ? data : (data.items || []); state.items = arr; applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
     function applyFilter(){ const q = $('#search').value.trim().toLowerCase(); const filtered = !q ? state.items : state.items.filter(x => { const n = (x.nome||x.name||'').toLowerCase(); const d = (x.descricao||x.description||'').toLowerCase(); return n.includes(q) || d.includes(q); }); state.filtered = filtered; renderList(filtered); }
@@ -473,26 +487,26 @@
     function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
     function validCvc(cvc){ const d=onlyDigits(cvc); return d.length===3 || d.length===4; }
     function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: Number(i.id), quantidade: Number(i.qty||1) })); }
-    function openCheckout(){ if(!isLogged()) { toast('Entre para finalizar a compra', false); return; } const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
-    async function openPix(){ const code = genOrderCode(); $('#pixCode').textContent = code; try { const items = cartToOrderItems(); if(!items.length) throw new Error('Carrinho vazio'); await apiCreateOrder({ items, payment_method: 'pix', code }); clearCart(); updateCartBadge(); $('#paymentModal').close(); $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e){ toast(e.message || 'Erro ao criar pedido', false); } }
-    function openCard(){ $('#paymentModal').close(); $('#cardModal').showModal(); }
+    function openCheckout(){ if(!isLogged()) { toast('Entre para finalizar a compra', false); return; } const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal') && $('#paymentModal').showModal(); }
+    async function openPix(){ const code = genOrderCode(); $('#pixCode') && ($('#pixCode').textContent = code); try { const items = cartToOrderItems(); if(!items.length) throw new Error('Carrinho vazio'); await apiCreateOrder({ items, payment_method: 'pix', code }); clearCart(); updateCartBadge(); $('#paymentModal') && $('#paymentModal').close(); $('#pixModal') && $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e){ toast(e.message || 'Erro ao criar pedido', false); } }
+    function openCard(){ $('#paymentModal') && $('#paymentModal').close(); $('#cardModal') && $('#cardModal').showModal(); }
 
     function setUpPaymentUI(){
-      $('#btnCheckout').onclick = openCheckout;
-      $('#payPix').onclick = openPix;
-      $('#payCard').onclick = openCard;
+      $('#btnCheckout') && ($('#btnCheckout').onclick = openCheckout);
+      $('#payPix') && ($('#payPix').onclick = openPix);
+      $('#payCard') && ($('#payCard').onclick = openCard);
 
       const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError');
       function onlyDigitsLocal(v){ return String(v||'').replace(/\D+/g,''); }
       function maskNumber(v){ const d=onlyDigitsLocal(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); }
       function maskExp(v){ const d=onlyDigitsLocal(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); }
       function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } }
-      $('#ccNumber').addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
-      $('#ccExp').addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
-      $('#ccCvc').addEventListener('input', validate);
-      $('#ccName').addEventListener('input', validate);
+      $('#ccNumber') && $('#ccNumber').addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
+      $('#ccExp') && $('#ccExp').addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
+      $('#ccCvc') && $('#ccCvc').addEventListener('input', validate);
+      $('#ccName') && $('#ccName').addEventListener('input', validate);
 
-      $('#btnFinishCard').onclick = async ()=>{
+      $('#btnFinishCard') && ($('#btnFinishCard').onclick = async ()=>{
         const btnFinish = $('#btnFinishCard');
         if(btnFinish.disabled) return;
         const code = genOrderCode();
@@ -501,40 +515,44 @@
           if(!items.length) throw new Error('Carrinho vazio');
           await apiCreateOrder({ items, payment_method: 'card', code });
           clearCart(); updateCartBadge();
-          $('#cardModal').close();
-          $('#successCode').textContent = code;
-          $('#successModal').showModal();
+          $('#cardModal') && $('#cardModal').close();
+          $('#successCode') && ($('#successCode').textContent = code);
+          $('#successModal') && $('#successModal').showModal();
           toast('Pedido criado (Cartão)');
         } catch(e) {
           toast(e.message || 'Erro ao criar pedido', false);
         }
-      };
+      });
     }
 
     function safeName(u){ return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário'; }
-    function toggleMenu(show){ const menu = $('#userMenu'); if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden'); }
+    function toggleMenu(show){
+      const menu = $('#userMenu');
+      if (!menu) return;
+      if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden');
+    }
 
     function setAuthUI(){
       if (isLogged()){
-        $('#openAuth').classList.add('hidden');
-        $('#openRegister').classList.add('hidden');
-        $('#btnLogout').classList.add('hidden');
-        $('#userMenuWrap').classList.remove('hidden');
-        $('#userMenuBtn').textContent = safeName(state.user);
+        $('#openAuth') && $('#openAuth').classList.add('hidden');
+        $('#openRegister') && $('#openRegister').classList.add('hidden');
+        $('#btnLogout') && $('#btnLogout').classList.remove('hidden');
+        $('#userMenuWrap') && $('#userMenuWrap').classList.remove('hidden');
+        $('#userMenuBtn') && ($('#userMenuBtn').textContent = safeName(state.user));
         if (isAdmin()){
-          $('#adminPanel').classList.remove('hidden');
-          $('#openSettings').classList.remove('hidden');
+          $('#adminPanel') && $('#adminPanel').classList.remove('hidden');
+          $('#openSettings') && $('#openSettings').classList.remove('hidden');
         } else {
-          $('#adminPanel').classList.add('hidden');
-          $('#openSettings').classList.add('hidden');
+          $('#adminPanel') && $('#adminPanel').classList.add('hidden');
+          $('#openSettings') && $('#openSettings').classList.add('hidden');
         }
       } else {
-        $('#openAuth').classList.remove('hidden');
-        $('#openRegister').classList.remove('hidden');
-        $('#btnLogout').classList.add('hidden');
-        $('#userMenuWrap').classList.add('hidden');
-        $('#adminPanel').classList.add('hidden');
-        $('#openSettings').classList.add('hidden');
+        $('#openAuth') && $('#openAuth').classList.remove('hidden');
+        $('#openRegister') && $('#openRegister').classList.remove('hidden');
+        $('#btnLogout') && $('#btnLogout').classList.add('hidden');
+        $('#userMenuWrap') && $('#userMenuWrap').classList.add('hidden');
+        $('#adminPanel') && $('#adminPanel').classList.add('hidden');
+        $('#openSettings') && $('#openSettings').classList.add('hidden');
       }
       updateCartBadge();
       renderCart();
@@ -543,6 +561,7 @@
     function renderOrdersList(list){
       const wrap = $('#ordersWrap');
       const empty = $('#ordersEmpty');
+      if (!wrap || !empty) return;
       wrap.innerHTML = '';
       if (!Array.isArray(list) || list.length === 0){
         empty.classList.remove('hidden');
@@ -575,52 +594,52 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      $('#openSettings').onclick = ()=> $('#settings').showModal();
-      $('#apiBase').value = getBase();
-      $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
-      $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
+      $('#openSettings') && ($('#openSettings').onclick = ()=> $('#settings').showModal());
+      $('#apiBase') && ($('#apiBase').value = getBase());
+      $('#btnSaveBase') && ($('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); });
+      $('#btnPing') && ($('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } });
 
-      $('#openAuth').onclick = ()=> $('#auth').showModal();
-      $('#openRegister').onclick = ()=> $('#register').showModal();
+      $('#openAuth') && ($('#openAuth').onclick = ()=> $('#auth').showModal());
+      $('#openRegister') && ($('#openRegister').onclick = ()=> $('#register').showModal());
 
-      $('#userMenuBtn').onclick = (e)=>{ e.stopPropagation(); toggleMenu($('#userMenu').classList.contains('hidden')); };
+      $('#userMenuBtn') && ($('#userMenuBtn').onclick = (e)=>{ e.stopPropagation(); const m=$('#userMenu'); toggleMenu(m?m.classList.contains('hidden'):false); });
       document.addEventListener('click', ()=> toggleMenu(false));
 
-      $('#openProfile').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false);
+      $('#openProfile') && ($('#openProfile').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false);
         try{
           const me = await apiGetMe();
-          $('#pfNome').value = me.nome || '';
-          $('#pfTelefone').value = me.telefone || '';
-          $('#pfEndereco').value = me.endereco || '';
-          $('#profile').showModal();
+          $('#pfNome') && ($('#pfNome').value = me.nome || '');
+          $('#pfTelefone') && ($('#pfTelefone').value = me.telefone || '');
+          $('#pfEndereco') && ($('#pfEndereco').value = me.endereco || '');
+          $('#profile') && $('#profile').showModal();
         } catch(e){ toast(e.message, false); }
-      };
+      });
 
-      $('#openOrders').onclick = async (e)=>{
+      $('#openOrders') && ($('#openOrders').onclick = async (e)=>{
         e.stopPropagation(); toggleMenu(false);
         if (!isLogged()) { toast('Entre para ver seus pedidos', false); return; }
         try{
           const data = await apiGetMyOrders();
           const orders = Array.isArray(data?.orders) ? data.orders : (Array.isArray(data)? data : []);
           renderOrdersList(orders);
-          $('#ordersModal').showModal();
+          $('#ordersModal') && $('#ordersModal').showModal();
         } catch(err){ toast(err.message || 'Erro ao carregar pedidos', false); }
-      };
+      });
 
-      $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
+      $('#logoutFromMenu') && ($('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); });
 
-      $('#doLogin').onclick = async ()=>{
-        const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden');
+      $('#doLogin') && ($('#doLogin').onclick = async ()=>{
+        const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err && err.classList.add('hidden');
         try{
           const data = await apiLogin(email, password);
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
-        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
-      };
+          $('#auth') && $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
+        } catch(e){ if (err){ err.textContent = e.message; err.classList.remove('hidden'); } else { toast(e.message, false);} }
+      });
 
-      $('#doRegister').onclick = async ()=>{
+      $('#doRegister') && ($('#doRegister').onclick = async ()=>{
         const payload = {
           email: $('#regEmail').value.trim(),
           password: $('#regPass').value,
@@ -628,25 +647,25 @@
           telefone: $('#regTelefone').value.trim() || null,
           endereco: $('#regEndereco').value.trim() || null
         };
-        const err = $('#regError'); err.classList.add('hidden');
+        const err = $('#regError'); err && err.classList.add('hidden');
         try{
           const data = await apiRegister(payload);
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#register').close(); setAuthUI(); toast('Conta criado'); load();
-        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
-      };
+          $('#register') && $('#register').close(); setAuthUI(); toast('Conta criada'); load();
+        } catch(e){ if (err){ err.textContent = e.message; err.classList.remove('hidden'); } else { toast(e.message, false); } }
+      });
 
-      $('#btnLogout').onclick = ()=>{
+      $('#btnLogout') && ($('#btnLogout').onclick = ()=>{
         localStorage.removeItem(STORAGE.token);
         localStorage.removeItem(STORAGE.user);
         state.token = null; state.user = null;
         setAuthUI(); toast('Sessão encerrada'); load();
-      };
+      });
 
-      $('#btnSaveProfile').onclick = async ()=>{
-        const err = $('#pfError'); err.classList.add('hidden');
+      $('#btnSaveProfile') && ($('#btnSaveProfile').onclick = async ()=>{
+        const err = $('#pfError'); err && err.classList.add('hidden');
         try{
           const payload = {
             nome: $('#pfNome').value.trim() || null,
@@ -656,35 +675,38 @@
           const me = await apiUpdateMe(payload);
           state.user = { ...state.user, ...me };
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#userMenuBtn').textContent = safeName(state.user);
-          $('#profile').close();
+          $('#userMenuBtn') && ($('#userMenuBtn').textContent = safeName(state.user));
+          $('#profile') && $('#profile').close();
           toast('Perfil atualizado');
-        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
-      };
+        } catch(e){ if (err){ err.textContent = e.message; err.classList.remove('hidden'); } else { toast(e.message, false); } }
+      });
 
-      $('#btnChangePassOpen').onclick = ()=> { $('#changePassModal').showModal(); };
-      $('#btnChangePass').onclick = async ()=>{
+      $('#btnChangePassOpen') && ($('#btnChangePassOpen').onclick = ()=> { $('#changePassModal') && $('#changePassModal').showModal(); });
+      $('#btnChangePass') && ($('#btnChangePass').onclick = async ()=>{
         const cur = $('#pfCurPass').value || '';
         const n1  = $('#pfNewPass').value || '';
         const n2  = $('#pfNewPass2').value || '';
-        const err = $('#cpError'); err.classList.add('hidden');
-        if (!cur || !n1 || !n2){ err.textContent='Preencher todos os campos de senha'; err.classList.remove('hidden'); return; }
-        if (n1.length < 6){ err.textContent='Nova senha deve ter ao menos 6 caracteres'; err.classList.remove('hidden'); return; }
-        if (n1 !== n2){ err.textContent='Nova senha e confirmação não conferem'; err.classList.remove('hidden'); return; }
+        const err = $('#cpError'); err && err.classList.add('hidden');
+        if (!cur || !n1 || !n2){ if (err){ err.textContent='Preencher todos os campos de senha'; err.classList.remove('hidden'); } return; }
+        if (n1.length < 6){ if (err){ err.textContent='Nova senha deve ter ao menos 6 caracteres'; err.classList.remove('hidden'); } return; }
+        if (n1 !== n2){ if (err){ err.textContent='Nova senha e confirmação não conferem'; err.classList.remove('hidden'); } return; }
         try{
           await apiChangePassword({ current_password: cur, new_password: n1 });
-          $('#pfCurPass').value = ''; $('#pfNewPass').value=''; $('#pfNewPass2').value='';
-          $('#changePassModal').close(); $('#profile').close();
+          $('#pfCurPass') && ($('#pfCurPass').value = '');
+          $('#pfNewPass') && ($('#pfNewPass').value = '');
+          $('#pfNewPass2') && ($('#pfNewPass2').value = '');
+          $('#changePassModal') && $('#changePassModal').close();
+          $('#profile') && $('#profile').close();
           toast('Senha alterada. Faça login novamente.');
           localStorage.removeItem(STORAGE.token);
           localStorage.removeItem(STORAGE.user);
           state.token = null; state.user = null;
           setAuthUI();
-        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
-      };
+        } catch(e){ if (err){ err.textContent = e.message; err.classList.remove('hidden'); } else { toast(e.message, false);} }
+      });
 
-      $('#btnDeleteAccount').onclick = async ()=>{
-        const err = $('#pfError'); err.classList.add('hidden');
+      $('#btnDeleteAccount') && ($('#btnDeleteAccount').onclick = async ()=>{
+        const err = $('#pfError'); err && err.classList.add('hidden');
         if (!confirm('Confirma remover sua conta? Esta ação é irreversível.')) return;
         try{
           await apiDeleteMe();
@@ -693,27 +715,27 @@
           localStorage.removeItem(STORAGE.user);
           localStorage.removeItem(cartKey());
           state.token = null; state.user = null;
-          $('#profile').close();
+          $('#profile') && $('#profile').close();
           setAuthUI();
           load();
-        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
-      };
+        } catch(e){ if (err){ err.textContent = e.message; err.classList.remove('hidden'); } else { toast(e.message, false); } }
+      });
 
-      $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
+      $('#openCart') && ($('#openCart').onclick = ()=>{ renderCart(); $('#cartModal') && $('#cartModal').showModal(); });
 
-      $('#search').addEventListener('input', applyFilter);
-      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
-      $('#btnRefresh').onclick = load;
+      $('#search') && $('#search').addEventListener('input', applyFilter);
+      $('#btnClear') && ($('#btnClear').onclick = ()=>{ $('#search') && ($('#search').value=''); applyFilter(); });
+      $('#btnRefresh') && ($('#btnRefresh').onclick = load);
 
       const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
-      drop?.addEventListener('click', ()=> fileInput.click());
-      drop?.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
-      drop?.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
-      drop?.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showPreview(fileInput.files[0]); } });
-      fileInput?.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
-      function showPreview(file){ const ok = /image\/(png|jpe?g)/i.test(file.type); if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; } const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden'); }
+      drop && drop.addEventListener('click', ()=> fileInput && fileInput.click());
+      drop && drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
+      drop && drop.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
+      drop && drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { if (fileInput) fileInput.files = e.dataTransfer.files; showPreview(e.dataTransfer.files[0]); } });
+      fileInput && fileInput.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
+      function showPreview(file){ const ok = /image\/(png|jpe?g)/i.test(file.type); if(!ok){ toast('Apenas PNG/JPEG', false); if (fileInput) fileInput.value=''; if (preview) preview.classList.add('hidden'); return; } const url = URL.createObjectURL(file); if (preview){ preview.src = url; preview.classList.remove('hidden'); } }
 
-      $('#formCreate')?.addEventListener('submit', async (e)=>{
+      $('#formCreate') && $('#formCreate').addEventListener('submit', async (e)=>{
         e.preventDefault();
         if (!isLogged() || !isAdmin()) return toast('Ação restrita a administradores', false);
         const name = $('#name').value.trim();
@@ -723,7 +745,7 @@
         const file = $('#image').files[0];
         try{
           await apiCreate({ name, description, price, stock, file });
-          e.target.reset(); $('#preview').classList.add('hidden');
+          e.target.reset(); $('#preview') && $('#preview').classList.add('hidden');
           toast('Cupcake cadastrado'); load();
         }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
       });
