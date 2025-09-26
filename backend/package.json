@@ -1,8 +1,8 @@
 {
   "name": "cupcakesparatodos-backend",
   "version": "1.0.0",
+  "description": "Backend da aplicação Cupcakes para Todos (API em Node.js + Express + PostgreSQL)",
   "main": "src/index.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
@@ -13,7 +13,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "multer": "1.4.5-lts.1",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.11.5"
   },
   "devDependencies": {
@@ -21,5 +21,14 @@
   },
   "engines": {
     "node": ">=18 <23"
-  }
+  },
+  "keywords": [
+    "express",
+    "postgresql",
+    "cupcakes",
+    "api",
+    "ecommerce"
+  ],
+  "author": "Cupcakes para Todos",
+  "license": "MIT"
 }
