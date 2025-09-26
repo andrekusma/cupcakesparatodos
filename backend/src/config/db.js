@@ -1,13 +1,11 @@
 const { Pool } = require('pg');
-const dotenv = require('dotenv');
 
-dotenv.config();
+const connectionString = process.env.DATABASE_URL;
+const isSSL = !/localhost|127\.0\.0\.1/.test(connectionString || '');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production'
-    ? { rejectUnauthorized: false }
-    : false
+  connectionString,
+  ssl: isSSL ? { rejectUnauthorized: false } : false,
 });
 
 async function query(text, params) {

@@ -20,29 +20,25 @@
     .chip{display:inline-flex;align-items:center;gap:.25rem;background:#e7f5ef;color:#136f4e;font-weight:700;font-size:.7rem;border-radius:999px;padding:.25rem .5rem}
     .skeleton{background:linear-gradient(90deg,#f6f7f8 0%,#edeef1 50%,#f6f7f8 100%);background-size:200% 100%;animation:shine 1.2s infinite}
     @keyframes shine{to{background-position:-200% 0}}
+    .badge{min-width:1.25rem;height:1.25rem;border-radius:999px;background:#e84f96;color:#fff;font-size:.75rem;display:inline-grid;place-items:center;padding:0 .25rem}
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- Ícone cupcake (Opção A) -->
-        <svg width="36" height="36" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#F9C25D"/><stop offset="100%" stop-color="#E99E2B"/>
-            </linearGradient>
-          </defs>
-          <path d="M10 46c2-9 9-14 22-14s20 5 22 14c0 2-2 4-4 4H14c-2 0-4-2-4-4Z" fill="url(#g)"/>
-          <circle cx="32" cy="22" r="12" fill="#F58DB5"/>
-          <path d="M22 23c3-3 8-3 10-1 3-3 9-3 12 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"/>
-        </svg>
+        <img
+          src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F9C25D"/><stop offset="100%" stop-color="#E99E2B"/></linearGradient></defs><path d="M10 46c2-9 9-14 22-14s20 5 22 14c0 2-2 4-4 4H14c-2 0-4-2-4-4Z" fill="url(%23g)"/><circle cx="32" cy="22" r="12" fill="#F58DB5"/><path d="M22 23c3-3 8-3 10-1 3-3 9-3 12 0" stroke="%23fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>'
+          alt="CPT" class="w-9 h-9"/>
         <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
       </div>
       <nav class="flex items-center gap-2">
+        <button id="btnCart" class="btn btn-secondary">
+          Carrinho <span id="cartBadge" class="badge">0</span>
+        </button>
         <span id="hello" class="hidden text-sm text-gray-700 mr-2"></span>
-        <button id="btnAdmin" class="btn btn-secondary hidden">Administrador</button>
         <button id="btnProfile" class="btn btn-secondary hidden">Perfil</button>
+        <button id="btnRegister" class="btn btn-secondary">Cadastrar</button>
         <button id="btnLogin" class="btn btn-primary">Entrar</button>
         <button id="btnLogout" class="btn btn-secondary hidden">Sair</button>
       </nav>
@@ -101,11 +97,7 @@
         </div>
         <div>
           <label class="text-sm font-medium" for="image">Imagem (PNG/JPEG)</label>
-          <div id="drop" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition">
-            <p class="text-sm text-gray-600">Arraste a imagem aqui ou clique para selecionar</p>
-            <input id="image" type="file" accept="image/png,image/jpeg" class="hidden" required />
-          </div>
-          <img id="preview" alt="Prévia" class="hidden mt-2 w-full h-40 object-cover rounded-xl border" />
+          <input id="image" type="file" accept="image/png,image/jpeg" class="field" required />
         </div>
         <div class="flex gap-2">
           <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -122,19 +114,30 @@
         <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
       <div class="space-y-3">
-        <div>
-          <label class="text-sm font-medium" for="email">E-mail</label>
-          <input id="email" type="email" required class="field" placeholder="admin@exemplo.com" />
-        </div>
-        <div>
-          <label class="text-sm font-medium" for="password">Senha</label>
-          <input id="password" type="password" required class="field" placeholder="••••••••" />
-        </div>
+        <input id="email" type="email" required class="field" placeholder="E-mail" />
+        <input id="password" type="password" required class="field" placeholder="Senha" />
         <div class="flex gap-2">
-          <button id="doLogin" type="button" class="btn btn-primary">Entrar</button>
-          <button value="cancel" class="btn btn-secondary">Cancelar</button>
+          <button id="doLogin" type="button" class="btn btn-primary w-full">Entrar</button>
         </div>
         <p id="authError" class="hidden text-sm text-red-600"></p>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="register" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="bg-white p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Cadastrar</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <input id="r_nome" class="field" placeholder="Nome" />
+        <input id="r_email" type="email" required class="field" placeholder="E-mail" />
+        <input id="r_password" type="password" required class="field" placeholder="Senha" />
+        <div class="flex gap-2">
+          <button id="doRegister" type="button" class="btn btn-primary w-full">Criar conta</button>
+        </div>
+        <p id="regError" class="hidden text-sm text-red-600"></p>
       </div>
     </form>
   </dialog>
@@ -162,6 +165,65 @@
     </form>
   </dialog>
 
+  <dialog id="cart" class="backdrop:bg-black/30 rounded-2xl w-full max-w-xl p-0">
+    <div class="bg-white p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Seu carrinho</h3>
+        <button class="btn btn-secondary" onclick="document.getElementById('cart').close()">Fechar</button>
+      </div>
+      <div id="cartList" class="space-y-3"></div>
+      <div class="mt-4 flex items-center justify-between">
+        <strong>Total:</strong>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button id="btnCheckout" class="btn btn-primary">Finalizar compra</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="payChoice" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <div class="bg-white p-5 rounded-2xl">
+      <h3 class="text-lg font-bold mb-4">Forma de pagamento</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <button id="btnPix" class="btn btn-secondary flex-col py-6">
+          <span>💠</span><span>PIX</span>
+        </button>
+        <button id="btnCard" class="btn btn-secondary flex-col py-6">
+          <span>💳</span><span>Cartão de crédito</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="payPix" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <div class="bg-white p-5 rounded-2xl">
+      <h3 class="text-lg font-bold mb-3">Pagar com PIX</h3>
+      <p class="text-sm mb-3">Código da compra: <b id="pixCode"></b></p>
+      <p class="text-sm">Para confirmar sua compra transfira o valor da sua compra para nosso PIX: <b>cpt@cupcake.com</b>, insira o código da sua compra na sua transferência.</p>
+      <div class="mt-4 text-right">
+        <button class="btn btn-primary" onclick="document.getElementById('payPix').close()">Ok</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="payCard" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <div class="bg-white p-5 rounded-2xl">
+      <h3 class="text-lg font-bold mb-3">Pagar com cartão</h3>
+      <div class="space-y-3">
+        <input id="cc_name" class="field" placeholder="Nome no cartão" />
+        <input id="cc_number" class="field" placeholder="Número do cartão" />
+        <div class="grid grid-cols-2 gap-3">
+          <input id="cc_exp" class="field" placeholder="Validade (MM/AA)" />
+          <input id="cc_cvv" class="field" placeholder="CVV" />
+        </div>
+      </div>
+      <div class="mt-4 text-right">
+        <button id="btnFinishCard" class="btn btn-primary">Finalizar compra</button>
+      </div>
+    </div>
+  </dialog>
+
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
     <div class="rounded-xl bg-gray-900 text-white px-4 py-2 shadow" role="status"></div>
   </div>
@@ -171,9 +233,7 @@
     const getBase = () => localStorage.getItem(STORAGE.base) || 'https://cupcakesparatodos.onrender.com';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
     const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items:[], filtered:[] };
-
     const $ = s=>document.querySelector(s);
-    const $$ = s=>Array.from(document.querySelectorAll(s));
 
     function toast(msg, ok=true){
       const box = $('#toast');
@@ -187,14 +247,22 @@
     function currency(n){ return Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL'}); }
     function fullURL(p){ if(!p) return ''; if(/^https?:\/\//i.test(p)) return p; return `${getBase()}${p.startsWith('/')?'':'/'}${p}`; }
 
+    function cartKey(){ return state.user ? `CART_${state.user.id}` : 'CART_ANON'; }
+    function getCart(){ try{ return JSON.parse(localStorage.getItem(cartKey())||'[]'); }catch{ return []; } }
+    function setCart(c){ localStorage.setItem(cartKey(), JSON.stringify(c)); updateCartBadge(); }
+    function updateCartBadge(){ const c=getCart(); const total=c.reduce((s,i)=>s+i.q,0); document.getElementById('cartBadge').textContent = total; }
+
     async function apiLogin(email, password){
-      const r = await fetch(`${getBase()}/api/auth/login`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password })
-      });
+      const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
       const d = await r.json().catch(()=>({message:'Erro'}));
       if(!r.ok) throw new Error(d.message||`Falha no login (${r.status})`);
-      return d; // { token, user }
+      return d;
+    }
+    async function apiRegister(email, password, nome){
+      const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password, nome }) });
+      const d = await r.json().catch(()=>({message:'Erro'}));
+      if(!r.ok) throw new Error(d.message||`Falha no cadastro (${r.status})`);
+      return d;
     }
     async function apiMe(){
       const r = await fetch(`${getBase()}/api/auth/me`, { headers:{...authHeader()} });
@@ -202,15 +270,11 @@
       return r.json();
     }
     async function apiUpdateMe(payload){
-      const r = await fetch(`${getBase()}/api/auth/me`, {
-        method:'PUT', headers:{'Content-Type':'application/json', ...authHeader()},
-        body: JSON.stringify(payload)
-      });
+      const r = await fetch(`${getBase()}/api/auth/me`, { method:'PUT', headers:{'Content-Type':'application/json', ...authHeader()}, body: JSON.stringify(payload) });
       const d = await r.json();
       if(!r.ok) throw new Error(d.message||'Erro ao atualizar');
       return d;
     }
-
     async function apiList(){
       const r = await fetch(`${getBase()}/api/cupcakes`);
       if(!r.ok) throw new Error('Não foi possível carregar os cupcakes');
@@ -223,24 +287,29 @@
       fd.append('preco_cents', Math.round(Number(price)*100));
       fd.append('estoque', Number(stock||0));
       if(file) fd.append('image', file);
-
-      const r = await fetch(`${getBase()}/api/admin/cupcakes`, {
-        method:'POST', headers:{ ...authHeader() }, body: fd
-      });
+      const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd });
       const d = await r.json().catch(()=>({message:'Erro'}));
       if(!r.ok) throw new Error(d.message||`Erro ao criar (${r.status})`);
       return d;
     }
     async function apiDelete(id){
-      const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, {
-        method:'DELETE', headers:{ ...authHeader() }
-      });
+      const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } });
       if(!r.ok) throw new Error(`Falha ao excluir (${r.status})`);
       return true;
     }
+    async function apiCreateOrder(items, payment_method){
+      const r = await fetch(`${getBase()}/api/orders`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json', ...authHeader()},
+        body: JSON.stringify({ items, payment_method })
+      });
+      const d = await r.json().catch(()=>({message:'Erro'}));
+      if(!r.ok) throw new Error(d.message||`Erro ao criar pedido (${r.status})`);
+      return d;
+    }
 
     function renderSkeleton(n=6){
-      const grid = $('#grid'); grid.innerHTML = '';
+      const grid = document.getElementById('grid'); grid.innerHTML = '';
       for(let i=0;i<n;i++){
         const el = document.createElement('div');
         el.className = 'card';
@@ -265,10 +334,10 @@
       };
     }
     function renderList(items){
-      const grid = $('#grid'); grid.innerHTML = '';
-      $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`;
-      if(!items.length){ $('#empty').classList.remove('hidden'); return; }
-      $('#empty').classList.add('hidden');
+      const grid = document.getElementById('grid'); grid.innerHTML = '';
+      document.getElementById('countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`;
+      if(!items.length){ document.getElementById('empty').classList.remove('hidden'); return; }
+      document.getElementById('empty').classList.add('hidden');
 
       items.map(normalize).forEach((c) => {
         const el = document.createElement('article');
@@ -280,19 +349,34 @@
             <p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p>
             <div class="mt-auto flex items-center justify-between">
               <span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span>
-              ${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}
+              ${isAdmin()
+                ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>`
+                : `<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button>`}
             </div>
           </div>`;
         grid.appendChild(el);
       });
 
       if (isAdmin()){
-        $$('#grid [data-del]').forEach(btn=>{
+        document.querySelectorAll('#grid [data-del]').forEach(btn=>{
           btn.addEventListener('click', async (ev)=>{
             const id = ev.currentTarget.getAttribute('data-del');
             if (!confirm('Confirma excluir este cupcake?')) return;
             try { await apiDelete(id); toast('Cupcake excluído'); await load(); }
             catch(e){ toast(e.message||'Erro ao excluir', false); }
+          });
+        });
+      } else {
+        document.querySelectorAll('#grid [data-add]').forEach(btn=>{
+          btn.addEventListener('click', (ev)=>{
+            if(!state.token) return toast('Faça login para adicionar ao carrinho', false);
+            const id = Number(ev.currentTarget.getAttribute('data-add'));
+            const prod = items.map(normalize).find(p=>p.id===id);
+            if(!prod) return;
+            const cart = getCart();
+            const idx = cart.findIndex(it=>it.id===id);
+            if(idx>=0){ cart[idx].q += 1; } else { cart.push({ id, nome: prod.name, preco_cents: prod.price_cents, q:1 }); }
+            setCart(cart); toast('Adicionado ao carrinho');
           });
         });
       }
@@ -303,44 +387,72 @@
         renderSkeleton();
         const data = await apiList();
         state.items = Array.isArray(data) ? data : (data.items || []);
-        applyFilter();
+        renderList(state.items);
       } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); }
-    }
-    function applyFilter(){
-      const q = $('#search').value.trim().toLowerCase();
-      const filtered = !q ? state.items : state.items.filter(x => {
-        const n = (x.nome||x.name||'').toLowerCase();
-        const d = (x.descricao||x.description||'').toLowerCase();
-        return n.includes(q) || d.includes(q);
-      });
-      state.filtered = filtered;
-      renderList(filtered);
     }
 
     function setAuthUI(){
-      const hello = $('#hello');
+      const hello = document.getElementById('hello');
       if(state.token && state.user){
         hello.textContent = `Olá, ${state.user.nome || state.user.email}`;
         hello.classList.remove('hidden');
-        $('#btnLogin').classList.add('hidden');
-        $('#btnLogout').classList.remove('hidden');
-        $('#btnProfile').classList.remove('hidden');
-        isAdmin() ? $('#adminPanel').classList.remove('hidden') : $('#adminPanel').classList.add('hidden');
-        isAdmin() ? $('#btnAdmin').classList.remove('hidden') : $('#btnAdmin').classList.add('hidden');
+        document.getElementById('btnLogin').classList.add('hidden');
+        document.getElementById('btnLogout').classList.remove('hidden');
+        document.getElementById('btnProfile').classList.remove('hidden');
+        isAdmin() ? document.getElementById('adminPanel').classList.remove('hidden') : document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('btnRegister').classList.add('hidden');
       } else {
         hello.classList.add('hidden');
-        $('#btnLogin').classList.remove('hidden');
-        $('#btnLogout').classList.add('hidden');
-        $('#btnProfile').classList.add('hidden');
-        $('#adminPanel').classList.add('hidden');
-        $('#btnAdmin').classList.add('hidden');
+        document.getElementById('btnLogin').classList.remove('hidden');
+        document.getElementById('btnLogout').classList.add('hidden');
+        document.getElementById('btnProfile').classList.add('hidden');
+        document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('btnRegister').classList.remove('hidden');
       }
+      updateCartBadge();
     }
+
+    function openCart(){
+      if(!state.token) return toast('Faça login para ver o carrinho', false);
+      const list = document.getElementById('cartList'); list.innerHTML='';
+      const cart = getCart();
+      if(cart.length===0){
+        list.innerHTML = `<p class="text-sm text-gray-600">Seu carrinho está vazio.</p>`;
+      } else {
+        cart.forEach((it,idx)=>{
+          const row = document.createElement('div');
+          row.className='flex items-center justify-between border rounded-xl p-3';
+          row.innerHTML = `
+            <div>
+              <div class="font-semibold">${it.nome}</div>
+              <div class="text-sm text-gray-600">${currency(it.preco_cents/100)}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button data-dec="${idx}" class="btn btn-secondary">-</button>
+              <span>${it.q}</span>
+              <button data-inc="${idx}" class="btn btn-secondary">+</button>
+              <button data-rem="${idx}" class="btn btn-danger">Remover</button>
+            </div>`;
+          list.appendChild(row);
+        });
+      }
+      updateCartTotal();
+      document.getElementById('cart').showModal();
+
+      list.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{const i=+b.dataset.inc; const c=getCart(); c[i].q++; setCart(c); openCart();});
+      list.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{const i=+b.dataset.dec; const c=getCart(); c[i].q=Math.max(1,c[i].q-1); setCart(c); openCart();});
+      list.querySelectorAll('[data-rem]').forEach(b=>b.onclick=()=>{const i=+b.dataset.rem; const c=getCart(); c.splice(i,1); setCart(c); openCart();});
+    }
+    function updateCartTotal(){
+      const cart = getCart();
+      const total = cart.reduce((s,i)=>s + i.preco_cents*i.q, 0);
+      document.getElementById('cartTotal').textContent = currency(total/100);
+    }
+    function genCode(){ return 'CPT-' + Math.random().toString(36).slice(2,8).toUpperCase(); }
 
     document.addEventListener('DOMContentLoaded', async () => {
       setBase(getBase());
 
-      // tentar recuperar perfil se já houver token
       if(state.token){
         try{
           const me = await apiMe();
@@ -352,54 +464,78 @@
       }
 
       setAuthUI();
-      $('#btnRefresh').onclick = load;
-      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
-      $('#search').addEventListener('input', applyFilter);
+      await load();
 
-      $('#btnLogin').onclick = ()=> $('#auth').showModal();
-      $('#btnLogout').onclick = ()=>{
+      document.getElementById('btnRefresh').onclick = load;
+      document.getElementById('btnClear').onclick = ()=>{ document.getElementById('search').value=''; renderList(state.items); };
+      document.getElementById('search').addEventListener('input', ()=>{
+        const q = document.getElementById('search').value.trim().toLowerCase();
+        const filtered = !q ? state.items : state.items.filter(x => {
+          const n = (x.nome||x.name||'').toLowerCase();
+          const d = (x.descricao||x.description||'').toLowerCase();
+          return n.includes(q) || d.includes(q);
+        });
+        renderList(filtered);
+      });
+
+      document.getElementById('btnLogin').onclick = ()=> document.getElementById('auth').showModal();
+      document.getElementById('btnRegister').onclick = ()=> document.getElementById('register').showModal();
+      document.getElementById('btnLogout').onclick = ()=>{
         localStorage.removeItem(STORAGE.token);
         localStorage.removeItem(STORAGE.user);
         state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load();
       };
-      $('#doLogin').onclick = async ()=>{
-        const email = $('#email').value.trim();
-        const password = $('#password').value;
-        const err = $('#authError'); err.classList.add('hidden');
+      document.getElementById('doLogin').onclick = async ()=>{
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const err = document.getElementById('authError'); err.classList.add('hidden');
         try{
           const data = await apiLogin(email, password);
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
+          document.getElementById('auth').close(); setAuthUI(); toast('Login realizado'); load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
+      document.getElementById('doRegister').onclick = async ()=>{
+        const email = document.getElementById('r_email').value.trim();
+        const password = document.getElementById('r_password').value;
+        const nome = document.getElementById('r_nome').value.trim();
+        const err = document.getElementById('regError'); err.classList.add('hidden');
+        try{
+          const data = await apiRegister(email, password, nome||null);
+          state.token = data.token; state.user = data.user || null;
+          localStorage.setItem(STORAGE.token, state.token);
+          localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
+          document.getElementById('register').close(); setAuthUI(); toast('Cadastro realizado'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      $('#btnProfile').onclick = async ()=>{
+      document.getElementById('btnProfile').onclick = async ()=>{
         try{
           const u = await apiMe();
-          $('#p_nome').value = u.nome || '';
-          $('#p_telefone').value = u.telefone || '';
-          $('#p_lgd').value = u.endereco_logradouro || '';
-          $('#p_num').value = u.endereco_numero || '';
-          $('#p_bairro').value = u.endereco_bairro || '';
-          $('#p_cidade').value = u.endereco_cidade || '';
-          $('#p_uf').value = u.endereco_uf || '';
-          $('#p_cep').value = u.endereco_cep || '';
-          $('#profile').showModal();
+          document.getElementById('p_nome').value = u.nome || '';
+          document.getElementById('p_telefone').value = u.telefone || '';
+          document.getElementById('p_lgd').value = u.endereco_logradouro || '';
+          document.getElementById('p_num').value = u.endereco_numero || '';
+          document.getElementById('p_bairro').value = u.endereco_bairro || '';
+          document.getElementById('p_cidade').value = u.endereco_cidade || '';
+          document.getElementById('p_uf').value = u.endereco_uf || '';
+          document.getElementById('p_cep').value = u.endereco_cep || '';
+          document.getElementById('profile').showModal();
         } catch(e){ toast(e.message||'Erro ao carregar perfil', false); }
       };
-      $('#btnSaveProfile').onclick = async ()=>{
+      document.getElementById('btnSaveProfile').onclick = async ()=>{
         try{
           const payload = {
-            nome: $('#p_nome').value,
-            telefone: $('#p_telefone').value,
-            endereco_logradouro: $('#p_lgd').value,
-            endereco_numero: $('#p_num').value,
-            endereco_bairro: $('#p_bairro').value,
-            endereco_cidade: $('#p_cidade').value,
-            endereco_uf: $('#p_uf').value,
-            endereco_cep: $('#p_cep').value
+            nome: document.getElementById('p_nome').value,
+            telefone: document.getElementById('p_telefone').value,
+            endereco_logradouro: document.getElementById('p_lgd').value,
+            endereco_numero: document.getElementById('p_num').value,
+            endereco_bairro: document.getElementById('p_bairro').value,
+            endereco_cidade: document.getElementById('p_cidade').value,
+            endereco_uf: document.getElementById('p_uf').value,
+            endereco_cep: document.getElementById('p_cep').value
           };
           const u = await apiUpdateMe(payload);
           state.user = u; localStorage.setItem(STORAGE.user, JSON.stringify(u));
@@ -407,42 +543,55 @@
         } catch(e){ toast(e.message||'Erro ao salvar', false); }
       };
 
-      // upload/preview
-      const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
-      drop.addEventListener('click', ()=> fileInput.click());
-      drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
-      drop.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
-      drop.addEventListener('drop', (e)=>{
-        e.preventDefault(); drop.classList.remove('bg-gray-50');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          fileInput.files = e.dataTransfer.files;
-          showPreview(fileInput.files[0]);
-        }
-      });
-      fileInput.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
-      function showPreview(file){
-        const ok = /image\/(png|jpe?g)/i.test(file.type);
-        if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; }
-        const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden');
-      }
+      document.getElementById('btnCart').onclick = openCart;
 
-      // cadastro admin
-      $('#formCreate').addEventListener('submit', async (e)=>{
+      document.getElementById('btnCheckout').onclick = ()=>{
+        if(!state.token) return toast('Faça login para finalizar', false);
+        const cart = getCart();
+        if(cart.length===0) return toast('Carrinho vazio', false);
+        document.getElementById('payChoice').showModal();
+      };
+      document.getElementById('btnPix').onclick = async ()=>{
+        try{
+          const cart = getCart();
+          const items = cart.map(it=>({ cupcake_id: it.id, quantidade: it.q }));
+          const order = await apiCreateOrder(items, 'PIX');
+          const code = order.code || genCode();
+          document.getElementById('pixCode').textContent = code;
+          setCart([]); document.getElementById('cart').close();
+          document.getElementById('payChoice').close();
+          document.getElementById('payPix').showModal();
+        } catch(e){ toast(e.message||'Erro ao criar pedido', false); }
+      };
+      document.getElementById('btnCard').onclick = ()=>{ document.getElementById('payChoice').close(); document.getElementById('payCard').showModal(); };
+      document.getElementById('btnFinishCard').onclick = async ()=>{
+        try{
+          const cart = getCart();
+          const items = cart.map(it=>({ cupcake_id: it.id, quantidade: it.q }));
+          const order = await apiCreateOrder(items, 'CARD');
+          const code = order.code || genCode();
+          setCart([]); document.getElementById('cart').close();
+          document.getElementById('payCard').close();
+          toast(`Pagamento efetuado. Código: ${code}`);
+        } catch(e){ toast(e.message||'Erro ao finalizar compra', false); }
+      };
+
+      document.getElementById('formCreate').addEventListener('submit', async (e)=>{
         e.preventDefault();
         if (!state.token || !isAdmin()) return toast('Ação restrita a administradores', false);
-        const name = $('#name').value.trim();
-        const description = $('#description').value.trim();
-        const price = $('#price').value;
-        const stock = $('#stock').value;
-        const file = $('#image').files[0];
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const price = document.getElementById('price').value;
+        const stock = document.getElementById('stock').value;
+        const file = document.getElementById('image').files[0];
         try{
           await apiCreate({ name, description, price, stock, file });
-          e.target.reset(); $('#preview').classList.add('hidden');
+          e.target.reset();
           toast('Cupcake cadastrado'); load();
         }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
       });
 
-      load();
+      updateCartBadge();
     });
   </script>
 </body>

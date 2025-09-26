@@ -12,7 +12,6 @@ const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 
-// CORS (localhost e *.onrender.com)
 const ALLOWED_ORIGINS = [
   'http://localhost:5500',
   'http://127.0.0.1:5500',
@@ -37,17 +36,14 @@ app.options('*', cors());
 
 app.use(express.json());
 
-// estáticos (uploads)
 const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../uploads');
 app.use('/uploads', express.static(uploadDir));
 
-// rotas
 app.use('/api/auth', authRoutes);
-app.use('/api/cupcakes', cupcakeRoutes);          // <- GET /api/cupcakes
-app.use('/api/admin', adminRoutes);               // <- POST/DELETE cupcakes admin
+app.use('/api/cupcakes', cupcakeRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/orders', orderRoutes);
 
-// healthcheck
 app.get('/', (_req, res) => res.send('API Cupcakes para Todos está rodando!'));
 
 const PORT = process.env.PORT || 3000;
