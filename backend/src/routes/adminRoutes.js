@@ -9,7 +9,7 @@ const { createCupcake, deleteCupcake } = require('../controllers/cupcakeControll
 const router = express.Router();
 
 function requireAdmin(req, res, next) {
-  if (!req.user || (req.user.role !== 'admin')) {
+  if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Ação restrita a administradores' });
   }
   next();
@@ -36,10 +36,7 @@ const fileFilter = (_req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-// POST /api/admin/cupcakes  (multipart, campo "image")
 router.post('/cupcakes', authRequired, requireAdmin, upload.single('image'), createCupcake);
-
-// DELETE /api/admin/cupcakes/:id
 router.delete('/cupcakes/:id', authRequired, requireAdmin, deleteCupcake);
 
 module.exports = router;

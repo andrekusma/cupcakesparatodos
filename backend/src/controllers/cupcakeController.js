@@ -9,13 +9,14 @@ function norm(row) {
     preco_cents: row.preco_cents,
     estoque: row.estoque,
     image_url: row.image_url,
+    ativo: row.ativo,
   };
 }
 
 async function listCupcakes(_req, res) {
   try {
     const r = await query(
-      'SELECT id, nome, descricao, preco_cents, estoque, image_url FROM cupcakes ORDER BY id DESC'
+      'SELECT id, nome, descricao, preco_cents, estoque, image_url, ativo FROM cupcakes WHERE ativo = true ORDER BY id DESC'
     );
     return res.json(r.rows.map(norm));
   } catch (err) {
@@ -37,9 +38,9 @@ async function createCupcake(req, res) {
     }
 
     const r = await query(
-      `INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url)
-       VALUES ($1,$2,$3,$4,$5)
-       RETURNING id, nome, descricao, preco_cents, estoque, image_url`,
+      `INSERT INTO cupcakes (nome, descricao, preco_cents, estoque, image_url, ativo)
+       VALUES ($1,$2,$3,$4,$5,true)
+       RETURNING id, nome, descricao, preco_cents, estoque, image_url, ativo`,
       [
         String(nome),
         descricao ?? null,
@@ -61,8 +62,8 @@ async function deleteCupcake(req, res) {
     const id = Number(req.params.id);
     if (!id) return res.status(400).json({ message: 'ID inválido' });
 
-    await query('DELETE FROM cupcakes WHERE id = $1', [id]);
-    return res.json({ ok: true });
+    await query('UPDATE cupcakes SET ativo = false WHERE id = $1', [id]);
+    return res.json({ ok: true, softDeleted: true });
   } catch (err) {
     console.error('deleteCupcake error:', err);
     return res.status(500).json({ message: 'Erro ao excluir cupcake' });
