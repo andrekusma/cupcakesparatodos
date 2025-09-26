@@ -6,7 +6,8 @@ function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ message: 'Token ausente' });
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.id, role: payload.role || payload.isAdmin ? 'admin' : 'user' };
+    const isAdmin = payload.role === 'admin' || payload.isAdmin === true;
+    req.user = { id: payload.id, role: isAdmin ? 'admin' : 'user' };
     next();
   } catch {
     return res.status(401).json({ message: 'Token inválido' });
