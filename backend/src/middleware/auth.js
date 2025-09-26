@@ -1,21 +1,19 @@
 const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-cpt';
+
 function authRequired(req, res, next) {
-  const h = req.headers.authorization || '';
-  const m = h.match(/^Bearer (.+)$/i);
-  if (!m) return res.status(401).json({ message: 'Não autenticado' });
   try {
-    const payload = jwt.verify(m[1], process.env.JWT_SECRET);
-    req.user = { id: payload.id, email: payload.email, is_admin: !!payload.is_admin };
-    return next();
+    const h = req.headers.authorization || '';
+    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+    if (!token) return res.status(401).json({ message: 'Não autenticado' });
+
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = { id: payload.id, role: payload.role || 'user' };
+    next();
   } catch {
-    return res.status(401).json({ message: 'Token inválido' });
+    return res.status(401).json({ message: 'Sessão inválida' });
   }
 }
 
-function requireAdmin(req, res, next) {
-  if (req.user && req.user.is_admin) return next();
-  return res.status(403).json({ message: 'Acesso restrito' });
-}
-
-module.exports = { authRequired, requireAdmin };
+module.exports = { authRequired };

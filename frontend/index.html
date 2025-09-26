@@ -6,7 +6,7 @@
   <title>Cupcakes para Todos</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 1rem;border-radius:.75rem;font-weight:600;cursor:pointer;transition:all .15s ease;border:1px solid transparent}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.5rem 1rem;border-radius:.75rem;font-weight:600;cursor:pointer;transition:all .15s ease;user-select:none;box-shadow:0 2px 8px rgba(16,24,40,.08);border:1px solid transparent}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .btn-primary{background:#e84f96;color:#fff;border-color:#e84f96}
     .btn-primary:hover{background:#d4317d;border-color:#d4317d;transform:translateY(-1px)}
@@ -16,37 +16,70 @@
     .btn-danger:hover{background:#fecaca}
     .field{width:100%;border:1px solid #e5e7eb;border-radius:.75rem;padding:.5rem .75rem;font-size:.9rem;background:#fff;outline:none}
     .field:focus{border-color:#e84f96;box-shadow:0 0 0 3px rgba(232,79,150,.15)}
+    .glass{background:rgba(255,255,255,.8);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 30px rgba(16,24,40,.06)}
     .card{border:1px solid #e5e7eb;background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(16,24,40,.06);overflow:hidden}
     .chip{display:inline-flex;align-items:center;gap:.25rem;background:#e7f5ef;color:#136f4e;font-weight:700;font-size:.7rem;border-radius:999px;padding:.25rem .5rem}
     .skeleton{background:linear-gradient(90deg,#f6f7f8 0%,#edeef1 50%,#f6f7f8 100%);background-size:200% 100%;animation:shine 1.2s infinite}
     @keyframes shine{to{background-position:-200% 0}}
-    .badge{min-width:1.25rem;height:1.25rem;border-radius:999px;background:#e84f96;color:#fff;font-size:.75rem;display:inline-grid;place-items:center;padding:0 .25rem}
+    .icon-btn{position:relative}
+    .badge{position:absolute;top:-6px;right:-6px;background:#111827;color:#fff;border-radius:999px;font-size:.7rem;font-weight:700;min-width:1.25rem;height:1.25rem;display:grid;place-items:center;padding:0 .25rem}
+    .menu{position:absolute;right:0;top:100%;margin-top:.5rem;background:#fff;border:1px solid #e5e7eb;border-radius:.75rem;box-shadow:0 10px 30px rgba(16,24,40,.12);overflow:hidden;min-width:200px}
+    .menu a, .menu button{display:flex;width:100%;text-align:left;padding:.6rem .9rem;font-weight:500}
+    .menu a:hover,.menu button:hover{background:#f9fafb}
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white to-pink-50 text-gray-900">
+
   <header class="sticky top-0 z-50 bg-white/70 backdrop-blur border-b border-gray-200">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img
-          src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F9C25D"/><stop offset="100%" stop-color="#E99E2B"/></linearGradient></defs><path d="M10 46c2-9 9-14 22-14s20 5 22 14c0 2-2 4-4 4H14c-2 0-4-2-4-4Z" fill="url(%23g)"/><circle cx="32" cy="22" r="12" fill="#F58DB5"/><path d="M22 23c3-3 8-3 10-1 3-3 9-3 12 0" stroke="%23fff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>'
-          alt="CPT" class="w-9 h-9"/>
-        <h1 class="text-lg font-extrabold leading-tight">Cupcakes para Todos</h1>
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-label="Cupcakes para Todos" class="h-10 w-10 select-none" style="display:block">
+          <defs>
+            <linearGradient id="cup-frost" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffd6e7"/>
+              <stop offset="100%" stop-color="#ffa4c8"/>
+            </linearGradient>
+            <linearGradient id="cup-wrap" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f472b6"/>
+              <stop offset="100%" stop-color="#db2777"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="24" cy="41" rx="12" ry="3.5" fill="rgba(0,0,0,0.10)"/>
+          <path d="M12 22c0-4.5 4.5-7.5 9-6.3C22 12.5 25.5 10 29 10c4.5 0 8 3.5 8 8 2.5.7 4 2.7 4 5 0 3.3-3 6-6.8 6H18.8C14.7 29 12 25.8 12 22z" fill="url(#cup-frost)"/>
+          <circle cx="21" cy="17.5" r="1.2" fill="#34d399"/>
+          <circle cx="26" cy="14.5" r="1.1" fill="#60a5fa"/>
+          <circle cx="31" cy="18.5" r="1.2" fill="#f59e0b"/>
+          <circle cx="28.5" cy="22" r="1.1" fill="#a78bfa"/>
+          <circle cx="32.5" cy="12.2" r="2" fill="#ef4444"/>
+          <path d="M32.5 10c-1.5-1.8-1.2-3.6.8-5" stroke="#ef4444" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".7"/>
+          <path d="M16 29h16l-2.2 10.5a2.5 2.5 0 0 1-2.4 1.9h-6.8a2.5 2.5 0 0 1-2.4-1.9L16 29z" fill="url(#cup-wrap)"/>
+          <path d="M18.2 29l2 12M22 29l1 12M26 29l-1 12M29.8 29l-2 12" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M17 21c0-2.6 2.6-4.4 5.1-3.7" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+          <path d="M34 29c2.8 0 5.8-2.7 5.8-6 0-2.3-1.5-4.3-4-5 0-3.3-2.7-6-6-6-1.3 0-2.6.4-3.7 1.1 3.2.6 5.6 3.4 5.6 6.7 0 3.7-3 6.8-6.8 6.8H34z" fill="rgba(0,0,0,0.05)"/>
+        </svg>
+        <h1 class="text-lg font-extrabold leading-tight select-none">Cupcakes para Todos</h1>
       </div>
-      <nav class="flex items-center gap-2">
-        <button id="btnCart" class="btn btn-secondary">
-          Carrinho <span id="cartBadge" class="badge">0</span>
-        </button>
-        <span id="hello" class="hidden text-sm text-gray-700 mr-2"></span>
-        <button id="btnProfile" class="btn btn-secondary hidden">Perfil</button>
-        <button id="btnRegister" class="btn btn-secondary">Cadastrar</button>
-        <button id="btnLogin" class="btn btn-primary">Entrar</button>
+      <nav class="flex items-center gap-2 relative">
+        <button id="openSettings" class="btn btn-secondary hidden" title="Configurar API">Configurações</button>
+        <button id="openRegister" class="btn btn-secondary">Cadastrar</button>
+        <button id="openAuth" class="btn btn-primary">Entrar</button>
         <button id="btnLogout" class="btn btn-secondary hidden">Sair</button>
+        <button id="openCart" class="btn btn-secondary icon-btn" title="Carrinho">🛒
+          <span id="cartQty" class="badge hidden">0</span>
+        </button>
+        <div id="userMenuWrap" class="relative hidden">
+          <button id="userMenuBtn" class="btn btn-secondary"></button>
+          <div id="userMenu" class="menu hidden">
+            <button id="openProfile" type="button">Perfil</button>
+            <button id="logoutFromMenu" type="button">Sair</button>
+          </div>
+        </div>
       </nav>
     </div>
   </header>
 
   <section class="max-w-6xl mx-auto px-4 mt-6">
-    <div class="bg-white/70 backdrop-blur rounded-2xl p-5 border">
+    <div class="glass rounded-2xl p-5">
       <div class="flex flex-col md:flex-row md:items-end gap-3">
         <div class="flex-1">
           <label class="text-sm font-medium text-gray-700" for="search">Buscar cupcakes</label>
@@ -78,26 +111,30 @@
       <p class="text-sm text-gray-600 mb-3">Cadastro com imagem PNG/JPEG. Campo do upload: <b>image</b>.</p>
       <form id="formCreate" class="space-y-3">
         <div>
-          <label class="text-sm font-medium" for="name">Nome</label>
-          <input id="name" class="field" required />
+          <label class="text-sm font-medium text-gray-700" for="name">Nome</label>
+          <input id="name" class="field" required placeholder="Ex.: Red Velvet" />
         </div>
         <div>
-          <label class="text-sm font-medium" for="description">Descrição</label>
-          <textarea id="description" class="field" required></textarea>
+          <label class="text-sm font-medium text-gray-700" for="description">Descrição</label>
+          <textarea id="description" class="field" required placeholder="Breve descrição"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-medium" for="price">Preço (R$)</label>
+            <label class="text-sm font-medium text-gray-700" for="price">Preço (R$)</label>
             <input id="price" type="number" step="0.01" min="0" class="field" required />
           </div>
           <div>
-            <label class="text-sm font-medium" for="stock">Estoque</label>
+            <label class="text-sm font-medium text-gray-700" for="stock">Estoque</label>
             <input id="stock" type="number" step="1" min="0" class="field" value="0" />
           </div>
         </div>
         <div>
-          <label class="text-sm font-medium" for="image">Imagem (PNG/JPEG)</label>
-          <input id="image" type="file" accept="image/png,image/jpeg" class="field" required />
+          <label class="text-sm font-medium text-gray-700" for="image">Imagem (PNG/JPEG)</label>
+          <div id="drop" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition">
+            <p class="text-sm text-gray-600">Arraste a imagem aqui ou clique para selecionar</p>
+            <input id="image" type="file" accept="image/png,image/jpeg" class="hidden" required />
+          </div>
+          <img id="preview" alt="Prévia" class="hidden mt-2 w-full h-40 object-cover rounded-xl border" />
         </div>
         <div class="flex gap-2">
           <button type="submit" class="btn btn-primary">Cadastrar</button>
@@ -107,17 +144,52 @@
     </aside>
   </main>
 
+  <dialog id="settings" class="backdrop:bg-black/30 rounded-2xl w-full max-w-lg p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Configurações do frontend</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="apiBase">API Base URL</label>
+          <input id="apiBase" class="field" placeholder="https://cupcakesparatodos.onrender.com" />
+        </div>
+        <div class="text-xs text-gray-600">
+          <ul class="list-disc ml-5">
+            <li><code>POST /api/auth/login</code>, <code>POST /api/auth/register</code>, <code>GET /api/auth/me</code>, <code>PUT /api/auth/me</code>, <code>DELETE /api/auth/me</code>, <code>POST /api/auth/change-password</code></li>
+            <li><code>GET /api/cupcakes</code></li>
+            <li><code>POST /api/admin/cupcakes</code></li>
+            <li><code>DELETE /api/admin/cupcakes/:id</code></li>
+            <li><code>POST /api/orders</code></li>
+          </ul>
+        </div>
+        <div class="flex gap-2">
+          <button id="btnSaveBase" type="button" class="btn btn-primary">Salvar URL</button>
+          <button id="btnPing" type="button" class="btn btn-secondary">Testar conexão</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="auth" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <form method="dialog" class="bg-white p-5 rounded-2xl">
+    <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-lg font-bold">Entrar</h3>
         <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
       <div class="space-y-3">
-        <input id="email" type="email" required class="field" placeholder="E-mail" />
-        <input id="password" type="password" required class="field" placeholder="Senha" />
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="email">E-mail</label>
+          <input id="email" type="email" required class="field" placeholder="email@exemplo.com" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="password">Senha</label>
+          <input id="password" type="password" required class="field" placeholder="••••••••" />
+        </div>
         <div class="flex gap-2">
-          <button id="doLogin" type="button" class="btn btn-primary w-full">Entrar</button>
+          <button id="doLogin" type="button" class="btn btn-primary">Entrar</button>
+          <button value="cancel" class="btn btn-secondary">Cancelar</button>
         </div>
         <p id="authError" class="hidden text-sm text-red-600"></p>
       </div>
@@ -125,103 +197,202 @@
   </dialog>
 
   <dialog id="register" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <form method="dialog" class="bg-white p-5 rounded-2xl">
+    <form method="dialog" class="glass p-5 rounded-2xl">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-bold">Cadastrar</h3>
+        <h3 class="text-lg font-bold">Criar conta</h3>
         <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
       <div class="space-y-3">
-        <input id="r_nome" class="field" placeholder="Nome" />
-        <input id="r_email" type="email" required class="field" placeholder="E-mail" />
-        <input id="r_password" type="password" required class="field" placeholder="Senha" />
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="regNome">Nome</label>
+          <input id="regNome" class="field" placeholder="Seu nome" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="regTelefone">Telefone</label>
+          <input id="regTelefone" class="field" placeholder="(00) 90000-0000" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="regEndereco">Endereço</label>
+          <textarea id="regEndereco" class="field" placeholder="Rua, número, complemento, bairro, cidade, UF"></textarea>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="regEmail">E-mail</label>
+          <input id="regEmail" type="email" required class="field" placeholder="email@exemplo.com" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="regPass">Senha</label>
+          <input id="regPass" type="password" required class="field" placeholder="••••••••" />
+        </div>
         <div class="flex gap-2">
-          <button id="doRegister" type="button" class="btn btn-primary w-full">Criar conta</button>
+          <button id="doRegister" type="button" class="btn btn-primary">Cadastrar</button>
+          <button value="cancel" class="btn btn-secondary">Cancelar</button>
         </div>
         <p id="regError" class="hidden text-sm text-red-600"></p>
       </div>
     </form>
   </dialog>
 
-  <dialog id="profile" class="backdrop:bg-black/30 rounded-2xl w-full max-w-lg p-0">
-    <form method="dialog" class="bg-white p-5 rounded-2xl space-y-3">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold">Meu perfil</h3>
+  <dialog id="profile" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl" id="profileForm">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Seu perfil</h3>
         <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-sm">Nome</label><input id="p_nome" class="field"></div>
-        <div><label class="text-sm">Telefone</label><input id="p_telefone" class="field"></div>
-        <div class="col-span-2"><label class="text-sm">Logradouro</label><input id="p_lgd" class="field"></div>
-        <div><label class="text-sm">Número</label><input id="p_num" class="field"></div>
-        <div><label class="text-sm">Bairro</label><input id="p_bairro" class="field"></div>
-        <div><label class="text-sm">Cidade</label><input id="p_cidade" class="field"></div>
-        <div><label class="text-sm">UF</label><input id="p_uf" class="field"></div>
-        <div><label class="text-sm">CEP</label><input id="p_cep" class="field"></div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfNome">Nome</label>
+          <input id="pfNome" class="field" placeholder="Seu nome" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfTelefone">Telefone</label>
+          <input id="pfTelefone" class="field" placeholder="(00) 90000-0000" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfEndereco">Endereço</label>
+          <textarea id="pfEndereco" class="field" placeholder="Rua, número, complemento, bairro, cidade, UF"></textarea>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button id="btnSaveProfile" type="button" class="btn btn-primary">Salvar</button>
+      <p id="pfError" class="hidden text-sm text-red-600 mt-2"></p>
+      <div class="mt-4 flex justify-between items-center">
+        <button id="btnSaveProfile" type="button" class="btn btn-primary">Salvar alterações</button>
+        <div class="flex gap-2">
+          <button id="btnChangePassOpen" type="button" class="btn btn-secondary">Alterar senha</button>
+          <button id="btnDeleteAccount" type="button" class="btn btn-danger">Remover conta</button>
+        </div>
       </div>
-      <p id="profileMsg" class="hidden text-sm"></p>
     </form>
   </dialog>
 
-  <dialog id="cart" class="backdrop:bg-black/30 rounded-2xl w-full max-w-xl p-0">
-    <div class="bg-white p-5 rounded-2xl">
+  <dialog id="changePassModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl" id="changePassForm" novalidate>
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-bold">Seu carrinho</h3>
-        <button class="btn btn-secondary" onclick="document.getElementById('cart').close()">Fechar</button>
+        <h3 class="text-lg font-bold">Alterar senha</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
       </div>
-      <div id="cartList" class="space-y-3"></div>
-      <div class="mt-4 flex items-center justify-between">
-        <strong>Total:</strong>
-        <strong id="cartTotal">R$ 0,00</strong>
-      </div>
-      <div class="mt-4 flex gap-2 justify-end">
-        <button id="btnCheckout" class="btn btn-primary">Finalizar compra</button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="payChoice" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <div class="bg-white p-5 rounded-2xl">
-      <h3 class="text-lg font-bold mb-4">Forma de pagamento</h3>
-      <div class="grid grid-cols-2 gap-3">
-        <button id="btnPix" class="btn btn-secondary flex-col py-6">
-          <span>💠</span><span>PIX</span>
-        </button>
-        <button id="btnCard" class="btn btn-secondary flex-col py-6">
-          <span>💳</span><span>Cartão de crédito</span>
-        </button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="payPix" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <div class="bg-white p-5 rounded-2xl">
-      <h3 class="text-lg font-bold mb-3">Pagar com PIX</h3>
-      <p class="text-sm mb-3">Código da compra: <b id="pixCode"></b></p>
-      <p class="text-sm">Para confirmar sua compra transfira o valor da sua compra para nosso PIX: <b>cpt@cupcake.com</b>, insira o código da sua compra na sua transferência.</p>
-      <div class="mt-4 text-right">
-        <button class="btn btn-primary" onclick="document.getElementById('payPix').close()">Ok</button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="payCard" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
-    <div class="bg-white p-5 rounded-2xl">
-      <h3 class="text-lg font-bold mb-3">Pagar com cartão</h3>
       <div class="space-y-3">
-        <input id="cc_name" class="field" placeholder="Nome no cartão" />
-        <input id="cc_number" class="field" placeholder="Número do cartão" />
-        <div class="grid grid-cols-2 gap-3">
-          <input id="cc_exp" class="field" placeholder="Validade (MM/AA)" />
-          <input id="cc_cvv" class="field" placeholder="CVV" />
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfCurPass">Senha atual</label>
+          <input id="pfCurPass" type="password" class="field" placeholder="Senha atual">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfNewPass">Nova senha</label>
+          <input id="pfNewPass" type="password" class="field" placeholder="Nova senha">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="pfNewPass2">Confirmar nova senha</label>
+          <input id="pfNewPass2" type="password" class="field" placeholder="Confirmar nova senha">
         </div>
       </div>
-      <div class="mt-4 text-right">
-        <button id="btnFinishCard" class="btn btn-primary">Finalizar compra</button>
+      <p id="cpError" class="hidden text-sm text-red-600 mt-2"></p>
+      <div class="mt-4 flex justify-end">
+        <button id="btnChangePass" type="button" class="btn btn-primary">Salvar nova senha</button>
       </div>
-    </div>
+    </form>
+  </dialog>
+
+  <dialog id="cartModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-2xl p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Seu carrinho</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div id="cartItems" class="space-y-3 max-h-[50vh] overflow-auto"></div>
+      <div class="mt-4 flex items-center justify-between">
+        <div class="text-lg font-bold">Total: <span id="cartTotal">R$ 0,00</span></div>
+        <button id="btnCheckout" type="button" class="btn btn-primary">Finalizar compra</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="paymentModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Forma de pagamento</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="payPix" class="btn btn-secondary flex-col py-6">
+          <div class="text-3xl">⚡</div>
+          <div class="text-sm font-semibold mt-1">PIX</div>
+        </button>
+        <button type="button" id="payCard" class="btn btn-secondary flex-col py-6">
+          <div class="text-3xl">💳</div>
+          <div class="text-sm font-semibold mt-1">Cartão de crédito</div>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="pixModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Pagamento via PIX</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <p class="text-sm text-gray-700 mb-3">
+        Para confirmar sua compra, transfira o valor da sua compra para nosso PIX:
+        <b>cpt@cupcake.com</b>. Insira o código da sua compra na sua transferência.
+      </p>
+      <div class="card p-4 text-center">
+        <div class="text-xs text-gray-600">Código da compra</div>
+        <div id="pixCode" class="text-xl font-extrabold mt-1 select-all">—</div>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button class="btn btn-primary">Ok</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="successModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Compra concluída</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <p class="text-sm text-gray-700 mb-3">
+        Pagamento efetuado, agradecemos a preferência. Logo você receberá seus deliciosos cupcakes em casa.
+      </p>
+      <div class="card p-4 text-center">
+        <div class="text-xs text-gray-600">Código da compra</div>
+        <div id="successCode" class="text-xl font-extrabold mt-1 select-all">—</div>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button class="btn btn-primary">Ok</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="cardModal" class="backdrop:bg-black/30 rounded-2xl w-full max-w-md p-0">
+    <form method="dialog" class="glass p-5 rounded-2xl" id="cardFormEl" novalidate>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-bold">Cartão de crédito</h3>
+        <button class="btn btn-secondary" aria-label="Fechar">Fechar</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="ccName">Nome do portador</label>
+          <input id="ccName" class="field" autocomplete="cc-name" placeholder="Nome impresso no cartão" required />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700" for="ccNumber">Número do cartão</label>
+          <input id="ccNumber" class="field" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" required />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm font-medium text-gray-700" for="ccExp">Validade (MM/AA)</label>
+            <input id="ccExp" class="field" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" required />
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-700" for="ccCvc">Cód. verificação</label>
+            <input id="ccCvc" class="field" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" required />
+          </div>
+        </div>
+      </div>
+      <p id="cardError" class="hidden text-sm text-red-600 mt-2"></p>
+      <div class="mt-4 flex justify-end">
+        <button id="btnFinishCard" type="button" class="btn btn-primary" disabled>Finalizar compra</button>
+      </div>
+    </form>
   </dialog>
 
   <div id="toast" class="fixed bottom-4 right-4 z-[60] hidden">
@@ -230,368 +401,265 @@
 
   <script>
     const STORAGE = { base:'API_BASE_URL', token:'JWT_TOKEN', user:'AUTH_USER' };
-    const getBase = () => localStorage.getItem(STORAGE.base) || 'https://cupcakesparatodos.onrender.com';
+    const getBase = () => localStorage.getItem(STORAGE.base) || 'http://localhost:3000';
     const setBase = (v) => localStorage.setItem(STORAGE.base, String(v).replace(/\/$/, ''));
-    const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items:[], filtered:[] };
-    const $ = s=>document.querySelector(s);
+    const state = { token: localStorage.getItem(STORAGE.token) || null, user: JSON.parse(localStorage.getItem(STORAGE.user) || 'null'), items: [], filtered: [] };
 
-    function toast(msg, ok=true){
-      const box = $('#toast');
-      box.classList.remove('hidden');
-      box.firstElementChild.textContent = msg;
-      box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok? 'bg-gray-900 text-white': 'bg-red-600 text-white'}`;
-      setTimeout(()=> box.classList.add('hidden'), 2200);
-    }
-    function authHeader(){ return state.token ? { Authorization: `Bearer ${state.token}` } : {}; }
-    function isAdmin(){ return !!(state.user && state.user.is_admin); }
-    function currency(n){ return Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL'}); }
-    function fullURL(p){ if(!p) return ''; if(/^https?:\/\//i.test(p)) return p; return `${getBase()}${p.startsWith('/')?'':'/'}${p}`; }
+    const $ = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
+    function toast(msg, ok=true){ const box = $('#toast'); box.classList.remove('hidden'); box.firstElementChild.textContent = msg; box.firstElementChild.className = `rounded-xl px-4 py-2 shadow ${ok?'bg-gray-900 text-white':'bg-red-600 text-white'}`; setTimeout(()=> box.classList.add('hidden'), 2400); }
+    const isAdmin = ()=> !!(state.user && state.user.role==='admin');
+    const isLogged = ()=> !!(state.token && state.user);
+    const authHeader = ()=> state.token ? { Authorization:`Bearer ${state.token}` } : {};
+    const currency = (n)=> Number(n||0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' });
+    function fullURL(pathOrUrl){ if (!pathOrUrl) return ''; if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl; const base = getBase(); return `${base}${pathOrUrl.startsWith('/')?'':'/'}${pathOrUrl}`; }
 
-    function cartKey(){ return state.user ? `CART_${state.user.id}` : 'CART_ANON'; }
-    function getCart(){ try{ return JSON.parse(localStorage.getItem(cartKey())||'[]'); }catch{ return []; } }
-    function setCart(c){ localStorage.setItem(cartKey(), JSON.stringify(c)); updateCartBadge(); }
-    function updateCartBadge(){ const c=getCart(); const total=c.reduce((s,i)=>s+i.q,0); document.getElementById('cartBadge').textContent = total; }
+    function cartKey(){ const uid = state?.user?.id ?? 'guest'; return `CART_${uid}`; }
+    function loadCart(){ try{return JSON.parse(localStorage.getItem(cartKey())||'[]');}catch{return[];} }
+    function saveCart(arr){ localStorage.setItem(cartKey(), JSON.stringify(arr)); renderCart(); }
+    function clearCart(){ localStorage.removeItem(cartKey()); renderCart(); }
+    function cartQty(){ return loadCart().reduce((s,i)=> s+Number(i.qty||1), 0); }
+    function updateCartBadge(){ const q = cartQty(); const b = $('#cartQty'); if (q>0){ b.textContent = q; b.classList.remove('hidden'); } else { b.classList.add('hidden'); } }
+    function addToCart(item){ if (!isLogged()) return toast('Entre para usar o carrinho', false); const cart = loadCart(); const idx = cart.findIndex(x=> x.id===item.id); if (idx>=0) cart[idx].qty += 1; else cart.push({ id:item.id, name:item.name, price_cents:item.price_cents, image:item.image, qty:1 }); saveCart(cart); updateCartBadge(); toast('Adicionado ao carrinho'); }
+    function removeFromCart(id){ const cart = loadCart().filter(x=> x.id!==id); saveCart(cart); updateCartBadge(); }
+    function changeQty(id, delta){ const cart = loadCart(); const i = cart.findIndex(x=>x.id===id); if (i<0) return; cart[i].qty = Math.max(1, (cart[i].qty||1)+delta); saveCart(cart); updateCartBadge(); }
+    function renderCart(){ const wrap = $('#cartItems'); if(!wrap) return; const cart = loadCart(); wrap.innerHTML = ''; let total = 0; cart.forEach(it=>{ const price = (Number(it.price_cents||0)/100); total += price * Number(it.qty||1); const row = document.createElement('div'); row.className = 'card p-3 flex items-center gap-3'; row.innerHTML = `<img src="${it.image||''}" class="w-16 h-16 object-cover rounded-lg border" alt=""><div class="flex-1"><div class="font-semibold">${it.name||'Cupcake'}</div><div class="text-sm text-gray-600">${currency(price)}</div></div><div class="flex items-center gap-2"><button class="btn btn-secondary" data-dec="${it.id}">-</button><span class="w-8 text-center">${it.qty||1}</span><button class="btn btn-secondary" data-inc="${it.id}">+</button><button class="btn btn-danger" data-rem="${it.id}">Remover</button></div>`; wrap.appendChild(row); }); $('#cartTotal').textContent = currency(total); $$('#cartItems [data-inc]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-inc')), +1)); $$('#cartItems [data-dec]').forEach(b=> b.onclick = ()=> changeQty(Number(b.getAttribute('data-dec')), -1)); $$('#cartItems [data-rem]').forEach(b=> b.onclick = ()=> removeFromCart(Number(b.getAttribute('data-rem')))); }
 
-    async function apiLogin(email, password){
-      const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
-      const d = await r.json().catch(()=>({message:'Erro'}));
-      if(!r.ok) throw new Error(d.message||`Falha no login (${r.status})`);
-      return d;
-    }
-    async function apiRegister(email, password, nome){
-      const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password, nome }) });
-      const d = await r.json().catch(()=>({message:'Erro'}));
-      if(!r.ok) throw new Error(d.message||`Falha no cadastro (${r.status})`);
-      return d;
-    }
-    async function apiMe(){
-      const r = await fetch(`${getBase()}/api/auth/me`, { headers:{...authHeader()} });
-      if(r.status===401) throw new Error('Não autenticado');
-      return r.json();
-    }
-    async function apiUpdateMe(payload){
-      const r = await fetch(`${getBase()}/api/auth/me`, { method:'PUT', headers:{'Content-Type':'application/json', ...authHeader()}, body: JSON.stringify(payload) });
-      const d = await r.json();
-      if(!r.ok) throw new Error(d.message||'Erro ao atualizar');
-      return d;
-    }
-    async function apiList(){
-      const r = await fetch(`${getBase()}/api/cupcakes`);
-      if(!r.ok) throw new Error('Não foi possível carregar os cupcakes');
-      return r.json();
-    }
-    async function apiCreate({ name, description, price, stock, file }){
-      const fd = new FormData();
-      fd.append('nome', name);
-      fd.append('descricao', description);
-      fd.append('preco_cents', Math.round(Number(price)*100));
-      fd.append('estoque', Number(stock||0));
-      if(file) fd.append('image', file);
-      const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd });
-      const d = await r.json().catch(()=>({message:'Erro'}));
-      if(!r.ok) throw new Error(d.message||`Erro ao criar (${r.status})`);
-      return d;
-    }
-    async function apiDelete(id){
-      const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } });
-      if(!r.ok) throw new Error(`Falha ao excluir (${r.status})`);
-      return true;
-    }
-    async function apiCreateOrder(items, payment_method){
-      const r = await fetch(`${getBase()}/api/orders`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json', ...authHeader()},
-        body: JSON.stringify({ items, payment_method })
-      });
-      const d = await r.json().catch(()=>({message:'Erro'}));
-      if(!r.ok) throw new Error(d.message||`Erro ao criar pedido (${r.status})`);
-      return d;
-    }
+    async function parseJsonSafe(r){ const t = await r.text(); try{ return JSON.parse(t); } catch{ return { message: t || 'Erro' }; } }
+    async function apiLogin(email, password){ const r = await fetch(`${getBase()}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, password }) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no login (${r.status})`); return data; }
+    async function apiRegister(payload){ const r = await fetch(`${getBase()}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Falha no cadastro (${r.status})`); return data; }
+    async function apiGetMe(){ const r = await fetch(`${getBase()}/api/auth/me`, { headers: { ...authHeader() } }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Perfil (${r.status})`); return data; }
+    async function apiUpdateMe(payload){ const r = await fetch(`${getBase()}/api/auth/me`, { method:'PUT', headers:{ 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(payload) }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Atualizar perfil (${r.status})`); return data; }
+    async function apiChangePassword({ current_password, new_password }){ const r = await fetch(`${getBase()}/api/auth/change-password`, { method:'POST', headers:{ 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ current_password, new_password }) }); if(!r.ok){ const d=await parseJsonSafe(r); throw new Error(d.message||`Alterar senha (${r.status})`);} return true; }
+    async function apiDeleteMe(){ const r = await fetch(`${getBase()}/api/auth/me`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok){ const d=await parseJsonSafe(r); throw new Error(d.message||`Remover conta (${r.status})`);} return true; }
+    async function apiList(){ const r = await fetch(`${getBase()}/api/cupcakes`); if(!r.ok) throw new Error(`Cupcakes (${r.status})`); return parseJsonSafe(r); }
+    async function apiCreate({ name, description, price, stock, file }){ const fd = new FormData(); fd.append('nome', name); fd.append('descricao', description); fd.append('preco_cents', Math.round(Number(price)*100)); fd.append('estoque', Number(stock||0)); if (file) fd.append('image', file); const r = await fetch(`${getBase()}/api/admin/cupcakes`, { method:'POST', headers:{ ...authHeader() }, body: fd }); const data = await parseJsonSafe(r); if(!r.ok) throw new Error(data.message||`Criar cupcake (${r.status})`); return data; }
+    async function apiDelete(id){ const r = await fetch(`${getBase()}/api/admin/cupcakes/${id}`, { method:'DELETE', headers:{ ...authHeader() } }); if(!r.ok) throw new Error(`Excluir (${r.status})`); return true; }
+    async function apiCreateOrder({ items, payment_method, code }){ const r = await fetch(`${getBase()}/api/orders`, { method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify({ items, payment_method, code }) }); const data = await parseJsonSafe(r); if (!r.ok) throw new Error(data.message || `Pedido (${r.status})`); return data; }
 
-    function renderSkeleton(n=6){
-      const grid = document.getElementById('grid'); grid.innerHTML = '';
-      for(let i=0;i<n;i++){
-        const el = document.createElement('div');
-        el.className = 'card';
-        el.innerHTML = `
-          <div class="h-40 skeleton"></div>
-          <div class="p-4 space-y-2">
-            <div class="h-4 w-3/4 skeleton rounded"></div>
-            <div class="h-3 w-1/2 skeleton rounded"></div>
-            <div class="h-8 w-24 skeleton rounded"></div>
-          </div>`;
-        grid.appendChild(el);
-      }
-    }
-    function normalize(item){
-      const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path;
-      return {
-        id: item.id,
-        name: item.nome || item.name,
-        description: item.descricao || item.description || '',
-        price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100),
-        image: fullURL(imageRaw)
+    function renderSkeleton(count=6){ const grid = $('#grid'); grid.innerHTML = ''; for (let i=0;i<count;i++){ const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="h-40 skeleton"></div><div class="p-4 space-y-2"><div class="h-4 w-3/4 skeleton rounded"></div><div class="h-3 w-1/2 skeleton rounded"></div><div class="h-8 w-24 skeleton rounded"></div></div>`; grid.appendChild(card); } }
+    function normalize(item){ const imageRaw = item.image_url || item.imageUrl || item.image || item.image_path; return { id: item.id, name: item.nome || item.name, description: item.descricao || item.description || '', price_cents: item.preco_cents ?? Math.round(Number(item.price||0)*100), image: fullURL(imageRaw) }; }
+    function renderList(items){ const grid = $('#grid'); grid.innerHTML = ''; $('#countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`; if (!items.length){ $('#empty').classList.remove('hidden'); return; } $('#empty').classList.add('hidden'); items.map(normalize).forEach((c) => { const el = document.createElement('article'); el.className = 'card flex flex-col'; el.innerHTML = `<img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50"><div class="p-4 flex-1 flex flex-col gap-2"><h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3><p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p><div class="mt-auto flex items-center justify-between"><span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span><div class="flex gap-2">${isAdmin() ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>` : ''}<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button></div></div></div>`; grid.appendChild(el); el.querySelector('[data-add]').onclick = ()=> addToCart(c); if (isAdmin()){ const del = el.querySelector('[data-del]'); if (del) del.onclick = async ()=>{ if (!confirm('Confirma excluir este cupcake?')) return; try { await apiDelete(c.id); toast('Cupcake excluído'); await load(); } catch(e){ toast(e.message||'Erro ao excluir', false); } }; } }); }
+
+    async function load(){ try{ renderSkeleton(); const data = await apiList(); const arr = Array.isArray(data) ? data : (data.items || []); state.items = arr; applyFilter(); } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); } }
+    function applyFilter(){ const q = $('#search').value.trim().toLowerCase(); const filtered = !q ? state.items : state.items.filter(x => { const n = (x.nome||x.name||'').toLowerCase(); const d = (x.descricao||x.description||'').toLowerCase(); return n.includes(q) || d.includes(q); }); state.filtered = filtered; renderList(filtered); }
+
+    function genOrderCode(){ return 'CPT-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Date.now().toString(36).toUpperCase(); }
+    function onlyDigits(s){ return String(s||'').replace(/\D+/g,''); }
+    function luhn(card){ const s=onlyDigits(card); let sum=0,alt=false; for(let i=s.length-1;i>=0;i--){ let n=+s[i]; if(alt){ n*=2; if(n>9) n-=9; } sum+=n; alt=!alt; } return (sum%10)===0 && s.length>=13 && s.length<=19; }
+    function validExpiry(mmYY){ const m = mmYY.match(/^\s*(\d{2})\s*\/\s*(\d{2})\s*$/); if(!m) return false; const mm=+m[1], yy=+m[2]; if(mm<1||mm>12) return false; const year=2000+yy; const now=new Date(); const lastDay=new Date(year,mm,0); return lastDay >= new Date(now.getFullYear(), now.getMonth(), 1); }
+    function validCvc(cvc){ const d=onlyDigits(cvc); return d.length===3 || d.length===4; }
+    function cartToOrderItems(){ const cart = loadCart(); return cart.map(i => ({ cupcake_id: Number(i.id), quantidade: Number(i.qty||1) })); }
+    function openCheckout(){ if(!isLogged()) { toast('Entre para finalizar a compra', false); return; } const cart = loadCart(); const total = cart.reduce((s,i)=> s + (Number(i.price_cents||0)/100) * Number(i.qty||1), 0); if(!cart.length || total<=0){ toast('Carrinho vazio', false); return; } $('#paymentModal').showModal(); }
+    async function openPix(){ const code = genOrderCode(); $('#pixCode').textContent = code; try { const items = cartToOrderItems(); if(!items.length) throw new Error('Carrinho vazio'); await apiCreateOrder({ items, payment_method: 'pix', code }); clearCart(); updateCartBadge(); $('#paymentModal').close(); $('#pixModal').showModal(); toast('Pedido criado (PIX)'); } catch(e){ toast(e.message || 'Erro ao criar pedido', false); } }
+    function openCard(){ $('#paymentModal').close(); $('#cardModal').showModal(); }
+
+    function setUpPaymentUI(){
+      $('#btnCheckout').onclick = openCheckout;
+      $('#payPix').onclick = openPix;
+      $('#payCard').onclick = openCard;
+
+      const ccName=$('#ccName'), ccNumber=$('#ccNumber'), ccExp=$('#ccExp'), ccCvc=$('#ccCvc'), btnFinish=$('#btnFinishCard'), cardError=$('#cardError');
+      function onlyDigitsLocal(v){ return String(v||'').replace(/\D+/g,''); }
+      function maskNumber(v){ const d=onlyDigitsLocal(v).slice(0,19); return d.replace(/(\d{4})(?=\d)/g,'$1 ').trim(); }
+      function maskExp(v){ const d=onlyDigitsLocal(v).slice(0,4); if(d.length<=2) return d; return d.slice(0,2)+'/'+d.slice(2); }
+      function validate(){ const ok=(ccName.value||'').trim().length>=3 && luhn(ccNumber.value) && validExpiry(ccExp.value) && validCvc(ccCvc.value); btnFinish.disabled=!ok; if(!ok){ cardError.classList.remove('hidden'); cardError.textContent='Verifique os dados do cartão.'; } else { cardError.classList.add('hidden'); } }
+      $('#ccNumber').addEventListener('input', e=>{ e.target.value=maskNumber(e.target.value); validate(); });
+      $('#ccExp').addEventListener('input', e=>{ e.target.value=maskExp(e.target.value); validate(); });
+      $('#ccCvc').addEventListener('input', validate);
+      $('#ccName').addEventListener('input', validate);
+
+      $('#btnFinishCard').onclick = async ()=>{
+        const btnFinish = $('#btnFinishCard');
+        if(btnFinish.disabled) return;
+        const code = genOrderCode();
+        try {
+          const items = cartToOrderItems();
+          if(!items.length) throw new Error('Carrinho vazio');
+          await apiCreateOrder({ items, payment_method: 'card', code });
+          clearCart(); updateCartBadge();
+          $('#cardModal').close();
+          $('#successCode').textContent = code;
+          $('#successModal').showModal();
+          toast('Pedido criado (Cartão)');
+        } catch(e) {
+          toast(e.message || 'Erro ao criar pedido', false);
+        }
       };
     }
-    function renderList(items){
-      const grid = document.getElementById('grid'); grid.innerHTML = '';
-      document.getElementById('countChip').textContent = `${items.length} ${items.length===1?'item':'itens'}`;
-      if(!items.length){ document.getElementById('empty').classList.remove('hidden'); return; }
-      document.getElementById('empty').classList.add('hidden');
 
-      items.map(normalize).forEach((c) => {
-        const el = document.createElement('article');
-        el.className = 'card flex flex-col';
-        el.innerHTML = `
-          <img src="${c.image||''}" alt="${c.name||'Cupcake'}" class="w-full h-40 object-cover bg-gray-50">
-          <div class="p-4 flex-1 flex flex-col gap-2">
-            <h3 class="font-extrabold text-gray-900 leading-tight">${c.name||'—'}</h3>
-            <p class="text-sm text-gray-600 line-clamp-2">${c.description||''}</p>
-            <div class="mt-auto flex items-center justify-between">
-              <span class="font-extrabold text-green-700">${currency((c.price_cents||0)/100)}</span>
-              ${isAdmin()
-                ? `<button data-del="${c.id}" class="btn btn-danger text-sm">Excluir</button>`
-                : `<button data-add="${c.id}" class="btn btn-primary text-sm">Adicionar</button>`}
-            </div>
-          </div>`;
-        grid.appendChild(el);
-      });
-
-      if (isAdmin()){
-        document.querySelectorAll('#grid [data-del]').forEach(btn=>{
-          btn.addEventListener('click', async (ev)=>{
-            const id = ev.currentTarget.getAttribute('data-del');
-            if (!confirm('Confirma excluir este cupcake?')) return;
-            try { await apiDelete(id); toast('Cupcake excluído'); await load(); }
-            catch(e){ toast(e.message||'Erro ao excluir', false); }
-          });
-        });
-      } else {
-        document.querySelectorAll('#grid [data-add]').forEach(btn=>{
-          btn.addEventListener('click', (ev)=>{
-            if(!state.token) return toast('Faça login para adicionar ao carrinho', false);
-            const id = Number(ev.currentTarget.getAttribute('data-add'));
-            const prod = items.map(normalize).find(p=>p.id===id);
-            if(!prod) return;
-            const cart = getCart();
-            const idx = cart.findIndex(it=>it.id===id);
-            if(idx>=0){ cart[idx].q += 1; } else { cart.push({ id, nome: prod.name, preco_cents: prod.price_cents, q:1 }); }
-            setCart(cart); toast('Adicionado ao carrinho');
-          });
-        });
-      }
-    }
-
-    async function load(){
-      try{
-        renderSkeleton();
-        const data = await apiList();
-        state.items = Array.isArray(data) ? data : (data.items || []);
-        renderList(state.items);
-      } catch(e){ toast(e.message||'Erro ao carregar cupcakes', false); }
-    }
+    function safeName(u){ return u?.nome?.trim() || u?.email?.split('@')[0] || 'Usuário'; }
+    function toggleMenu(show){ const menu = $('#userMenu'); if (show) menu.classList.remove('hidden'); else menu.classList.add('hidden'); }
 
     function setAuthUI(){
-      const hello = document.getElementById('hello');
-      if(state.token && state.user){
-        hello.textContent = `Olá, ${state.user.nome || state.user.email}`;
-        hello.classList.remove('hidden');
-        document.getElementById('btnLogin').classList.add('hidden');
-        document.getElementById('btnLogout').classList.remove('hidden');
-        document.getElementById('btnProfile').classList.remove('hidden');
-        isAdmin() ? document.getElementById('adminPanel').classList.remove('hidden') : document.getElementById('adminPanel').classList.add('hidden');
-        document.getElementById('btnRegister').classList.add('hidden');
+      if (isLogged()){
+        $('#openAuth').classList.add('hidden');
+        $('#openRegister').classList.add('hidden');
+        $('#btnLogout').classList.add('hidden');
+        $('#userMenuWrap').classList.remove('hidden');
+        $('#userMenuBtn').textContent = safeName(state.user);
+        if (isAdmin()){
+          $('#adminPanel').classList.remove('hidden');
+          $('#openSettings').classList.remove('hidden');
+        } else {
+          $('#adminPanel').classList.add('hidden');
+          $('#openSettings').classList.add('hidden');
+        }
       } else {
-        hello.classList.add('hidden');
-        document.getElementById('btnLogin').classList.remove('hidden');
-        document.getElementById('btnLogout').classList.add('hidden');
-        document.getElementById('btnProfile').classList.add('hidden');
-        document.getElementById('adminPanel').classList.add('hidden');
-        document.getElementById('btnRegister').classList.remove('hidden');
+        $('#openAuth').classList.remove('hidden');
+        $('#openRegister').classList.remove('hidden');
+        $('#btnLogout').classList.add('hidden');
+        $('#userMenuWrap').classList.add('hidden');
+        $('#adminPanel').classList.add('hidden');
+        $('#openSettings').classList.add('hidden');
       }
       updateCartBadge();
+      renderCart();
     }
 
-    function openCart(){
-      if(!state.token) return toast('Faça login para ver o carrinho', false);
-      const list = document.getElementById('cartList'); list.innerHTML='';
-      const cart = getCart();
-      if(cart.length===0){
-        list.innerHTML = `<p class="text-sm text-gray-600">Seu carrinho está vazio.</p>`;
-      } else {
-        cart.forEach((it,idx)=>{
-          const row = document.createElement('div');
-          row.className='flex items-center justify-between border rounded-xl p-3';
-          row.innerHTML = `
-            <div>
-              <div class="font-semibold">${it.nome}</div>
-              <div class="text-sm text-gray-600">${currency(it.preco_cents/100)}</div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button data-dec="${idx}" class="btn btn-secondary">-</button>
-              <span>${it.q}</span>
-              <button data-inc="${idx}" class="btn btn-secondary">+</button>
-              <button data-rem="${idx}" class="btn btn-danger">Remover</button>
-            </div>`;
-          list.appendChild(row);
-        });
-      }
-      updateCartTotal();
-      document.getElementById('cart').showModal();
+    document.addEventListener('DOMContentLoaded', () => {
+      $('#openSettings').onclick = ()=> $('#settings').showModal();
+      $('#apiBase').value = getBase();
+      $('#btnSaveBase').onclick = ()=>{ setBase($('#apiBase').value || ''); toast('API Base URL salva'); };
+      $('#btnPing').onclick = async ()=>{ try{ const r = await fetch(`${getBase()}/api/cupcakes`); toast(r.ok? 'Conexão OK' : `Resposta ${r.status}`, r.ok); } catch{ toast('Falha de conexão', false); } };
 
-      list.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{const i=+b.dataset.inc; const c=getCart(); c[i].q++; setCart(c); openCart();});
-      list.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{const i=+b.dataset.dec; const c=getCart(); c[i].q=Math.max(1,c[i].q-1); setCart(c); openCart();});
-      list.querySelectorAll('[data-rem]').forEach(b=>b.onclick=()=>{const i=+b.dataset.rem; const c=getCart(); c.splice(i,1); setCart(c); openCart();});
-    }
-    function updateCartTotal(){
-      const cart = getCart();
-      const total = cart.reduce((s,i)=>s + i.preco_cents*i.q, 0);
-      document.getElementById('cartTotal').textContent = currency(total/100);
-    }
-    function genCode(){ return 'CPT-' + Math.random().toString(36).slice(2,8).toUpperCase(); }
+      $('#openAuth').onclick = ()=> $('#auth').showModal();
+      $('#openRegister').onclick = ()=> $('#register').showModal();
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      setBase(getBase());
-
-      if(state.token){
+      $('#userMenuBtn').onclick = (e)=>{ e.stopPropagation(); toggleMenu($('#userMenu').classList.contains('hidden')); };
+      document.addEventListener('click', ()=> toggleMenu(false));
+      $('#openProfile').onclick = async (e)=>{ e.stopPropagation(); toggleMenu(false);
         try{
-          const me = await apiMe();
-          state.user = me;
-          localStorage.setItem(STORAGE.user, JSON.stringify(me));
-        }catch{
-          state.token = null; localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user);
-        }
-      }
-
-      setAuthUI();
-      await load();
-
-      document.getElementById('btnRefresh').onclick = load;
-      document.getElementById('btnClear').onclick = ()=>{ document.getElementById('search').value=''; renderList(state.items); };
-      document.getElementById('search').addEventListener('input', ()=>{
-        const q = document.getElementById('search').value.trim().toLowerCase();
-        const filtered = !q ? state.items : state.items.filter(x => {
-          const n = (x.nome||x.name||'').toLowerCase();
-          const d = (x.descricao||x.description||'').toLowerCase();
-          return n.includes(q) || d.includes(q);
-        });
-        renderList(filtered);
-      });
-
-      document.getElementById('btnLogin').onclick = ()=> document.getElementById('auth').showModal();
-      document.getElementById('btnRegister').onclick = ()=> document.getElementById('register').showModal();
-      document.getElementById('btnLogout').onclick = ()=>{
-        localStorage.removeItem(STORAGE.token);
-        localStorage.removeItem(STORAGE.user);
-        state.token = null; state.user = null; setAuthUI(); toast('Sessão encerrada'); load();
+          const me = await apiGetMe();
+          $('#pfNome').value = me.nome || '';
+          $('#pfTelefone').value = me.telefone || '';
+          $('#pfEndereco').value = me.endereco || '';
+          $('#profile').showModal();
+        } catch(e){ toast(e.message, false); }
       };
-      document.getElementById('doLogin').onclick = async ()=>{
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const err = document.getElementById('authError'); err.classList.add('hidden');
+      $('#logoutFromMenu').onclick = ()=>{ localStorage.removeItem(STORAGE.token); localStorage.removeItem(STORAGE.user); state.token=null; state.user=null; setAuthUI(); toast('Sessão encerrada'); load(); };
+
+      $('#doLogin').onclick = async ()=>{
+        const email = $('#email').value.trim(); const password = $('#password').value; const err = $('#authError'); err.classList.add('hidden');
         try{
           const data = await apiLogin(email, password);
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          document.getElementById('auth').close(); setAuthUI(); toast('Login realizado'); load();
+          $('#auth').close(); setAuthUI(); toast('Login realizado'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
-      document.getElementById('doRegister').onclick = async ()=>{
-        const email = document.getElementById('r_email').value.trim();
-        const password = document.getElementById('r_password').value;
-        const nome = document.getElementById('r_nome').value.trim();
-        const err = document.getElementById('regError'); err.classList.add('hidden');
+
+      $('#doRegister').onclick = async ()=>{
+        const payload = {
+          email: $('#regEmail').value.trim(),
+          password: $('#regPass').value,
+          nome: $('#regNome').value.trim() || null,
+          telefone: $('#regTelefone').value.trim() || null,
+          endereco: $('#regEndereco').value.trim() || null
+        };
+        const err = $('#regError'); err.classList.add('hidden');
         try{
-          const data = await apiRegister(email, password, nome||null);
+          const data = await apiRegister(payload);
           state.token = data.token; state.user = data.user || null;
           localStorage.setItem(STORAGE.token, state.token);
           localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
-          document.getElementById('register').close(); setAuthUI(); toast('Cadastro realizado'); load();
+          $('#register').close(); setAuthUI(); toast('Conta criada'); load();
         } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      document.getElementById('btnProfile').onclick = async ()=>{
-        try{
-          const u = await apiMe();
-          document.getElementById('p_nome').value = u.nome || '';
-          document.getElementById('p_telefone').value = u.telefone || '';
-          document.getElementById('p_lgd').value = u.endereco_logradouro || '';
-          document.getElementById('p_num').value = u.endereco_numero || '';
-          document.getElementById('p_bairro').value = u.endereco_bairro || '';
-          document.getElementById('p_cidade').value = u.endereco_cidade || '';
-          document.getElementById('p_uf').value = u.endereco_uf || '';
-          document.getElementById('p_cep').value = u.endereco_cep || '';
-          document.getElementById('profile').showModal();
-        } catch(e){ toast(e.message||'Erro ao carregar perfil', false); }
+      $('#btnLogout').onclick = ()=>{
+        localStorage.removeItem(STORAGE.token);
+        localStorage.removeItem(STORAGE.user);
+        state.token = null; state.user = null;
+        setAuthUI(); toast('Sessão encerrada'); load();
       };
-      document.getElementById('btnSaveProfile').onclick = async ()=>{
+
+      $('#btnSaveProfile').onclick = async ()=>{
+        const err = $('#pfError'); err.classList.add('hidden');
         try{
           const payload = {
-            nome: document.getElementById('p_nome').value,
-            telefone: document.getElementById('p_telefone').value,
-            endereco_logradouro: document.getElementById('p_lgd').value,
-            endereco_numero: document.getElementById('p_num').value,
-            endereco_bairro: document.getElementById('p_bairro').value,
-            endereco_cidade: document.getElementById('p_cidade').value,
-            endereco_uf: document.getElementById('p_uf').value,
-            endereco_cep: document.getElementById('p_cep').value
+            nome: $('#pfNome').value.trim() || null,
+            telefone: $('#pfTelefone').value.trim() || null,
+            endereco: $('#pfEndereco').value.trim() || null
           };
-          const u = await apiUpdateMe(payload);
-          state.user = u; localStorage.setItem(STORAGE.user, JSON.stringify(u));
-          setAuthUI(); toast('Perfil atualizado');
-        } catch(e){ toast(e.message||'Erro ao salvar', false); }
+          const me = await apiUpdateMe(payload);
+          state.user = { ...state.user, ...me };
+          localStorage.setItem(STORAGE.user, JSON.stringify(state.user));
+          $('#userMenuBtn').textContent = safeName(state.user);
+          $('#profile').close();
+          toast('Perfil atualizado');
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      document.getElementById('btnCart').onclick = openCart;
-
-      document.getElementById('btnCheckout').onclick = ()=>{
-        if(!state.token) return toast('Faça login para finalizar', false);
-        const cart = getCart();
-        if(cart.length===0) return toast('Carrinho vazio', false);
-        document.getElementById('payChoice').showModal();
-      };
-      document.getElementById('btnPix').onclick = async ()=>{
+      $('#btnChangePassOpen').onclick = ()=> { $('#changePassModal').showModal(); };
+      $('#btnChangePass').onclick = async ()=>{
+        const cur = $('#pfCurPass').value || '';
+        const n1  = $('#pfNewPass').value || '';
+        const n2  = $('#pfNewPass2').value || '';
+        const err = $('#cpError'); err.classList.add('hidden');
+        if (!cur || !n1 || !n2){ err.textContent='Preencher todos os campos de senha'; err.classList.remove('hidden'); return; }
+        if (n1.length < 6){ err.textContent='Nova senha deve ter ao menos 6 caracteres'; err.classList.remove('hidden'); return; }
+        if (n1 !== n2){ err.textContent='Nova senha e confirmação não conferem'; err.classList.remove('hidden'); return; }
         try{
-          const cart = getCart();
-          const items = cart.map(it=>({ cupcake_id: it.id, quantidade: it.q }));
-          const order = await apiCreateOrder(items, 'PIX');
-          const code = order.code || genCode();
-          document.getElementById('pixCode').textContent = code;
-          setCart([]); document.getElementById('cart').close();
-          document.getElementById('payChoice').close();
-          document.getElementById('payPix').showModal();
-        } catch(e){ toast(e.message||'Erro ao criar pedido', false); }
-      };
-      document.getElementById('btnCard').onclick = ()=>{ document.getElementById('payChoice').close(); document.getElementById('payCard').showModal(); };
-      document.getElementById('btnFinishCard').onclick = async ()=>{
-        try{
-          const cart = getCart();
-          const items = cart.map(it=>({ cupcake_id: it.id, quantidade: it.q }));
-          const order = await apiCreateOrder(items, 'CARD');
-          const code = order.code || genCode();
-          setCart([]); document.getElementById('cart').close();
-          document.getElementById('payCard').close();
-          toast(`Pagamento efetuado. Código: ${code}`);
-        } catch(e){ toast(e.message||'Erro ao finalizar compra', false); }
+          await apiChangePassword({ current_password: cur, new_password: n1 });
+          $('#pfCurPass').value = ''; $('#pfNewPass').value=''; $('#pfNewPass2').value='';
+          $('#changePassModal').close(); $('#profile').close();
+          toast('Senha alterada. Faça login novamente.');
+          localStorage.removeItem(STORAGE.token);
+          localStorage.removeItem(STORAGE.user);
+          state.token = null; state.user = null;
+          setAuthUI();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
       };
 
-      document.getElementById('formCreate').addEventListener('submit', async (e)=>{
+      $('#btnDeleteAccount').onclick = async ()=>{
+        const err = $('#pfError'); err.classList.add('hidden');
+        if (!confirm('Confirma remover sua conta? Esta ação é irreversível.')) return;
+        try{
+          await apiDeleteMe();
+          toast('Conta removida');
+          localStorage.removeItem(STORAGE.token);
+          localStorage.removeItem(STORAGE.user);
+          localStorage.removeItem(cartKey());
+          state.token = null; state.user = null;
+          $('#profile').close();
+          setAuthUI();
+          load();
+        } catch(e){ err.textContent = e.message; err.classList.remove('hidden'); }
+      };
+
+      $('#openCart').onclick = ()=>{ renderCart(); $('#cartModal').showModal(); };
+
+      $('#search').addEventListener('input', applyFilter);
+      $('#btnClear').onclick = ()=>{ $('#search').value=''; applyFilter(); };
+      $('#btnRefresh').onclick = load;
+
+      const drop = $('#drop'); const fileInput = $('#image'); const preview = $('#preview');
+      drop?.addEventListener('click', ()=> fileInput.click());
+      drop?.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('bg-gray-50'); });
+      drop?.addEventListener('dragleave', ()=> drop.classList.remove('bg-gray-50'));
+      drop?.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('bg-gray-50'); if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; showPreview(fileInput.files[0]); } });
+      fileInput?.addEventListener('change', (e)=>{ if (e.target.files[0]) showPreview(e.target.files[0]); });
+      function showPreview(file){ const ok = /image\/(png|jpe?g)/i.test(file.type); if(!ok){ toast('Apenas PNG/JPEG', false); fileInput.value=''; preview.classList.add('hidden'); return; } const url = URL.createObjectURL(file); preview.src = url; preview.classList.remove('hidden'); }
+
+      $('#formCreate')?.addEventListener('submit', async (e)=>{
         e.preventDefault();
-        if (!state.token || !isAdmin()) return toast('Ação restrita a administradores', false);
-        const name = document.getElementById('name').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const price = document.getElementById('price').value;
-        const stock = document.getElementById('stock').value;
-        const file = document.getElementById('image').files[0];
+        if (!isLogged() || !isAdmin()) return toast('Ação restrita a administradores', false);
+        const name = $('#name').value.trim();
+        const description = $('#description').value.trim();
+        const price = $('#price').value;
+        const stock = $('#stock').value;
+        const file = $('#image').files[0];
         try{
           await apiCreate({ name, description, price, stock, file });
-          e.target.reset();
+          e.target.reset(); $('#preview').classList.add('hidden');
           toast('Cupcake cadastrado'); load();
         }catch(err){ toast(err.message||'Erro ao cadastrar', false); }
       });
 
-      updateCartBadge();
+      setUpPaymentUI();
+      setAuthUI(); load();
     });
   </script>
 </body>
