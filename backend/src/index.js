@@ -18,6 +18,7 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
+
 app.use(cors({
   origin(origin, cb) {
     if (!origin) return cb(null, true);
@@ -25,12 +26,13 @@ app.use(cors({
       const okListed = ALLOWED_ORIGINS.includes(origin);
       const hostname = new URL(origin).hostname;
       const okRender = /\.onrender\.com$/i.test(hostname);
-      if (okListed || okRender) return cb(null, true);
+      const okNetlify = /\.netlify\.app$/i.test(hostname);
+      if (okListed || okRender || okNetlify) return cb(null, true);
     } catch {}
     return cb(new Error('Not allowed by CORS: ' + origin), false);
   },
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.options('*', cors());
 
