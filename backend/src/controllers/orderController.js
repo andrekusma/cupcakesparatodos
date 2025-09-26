@@ -1,110 +1,114 @@
-// backend/src/controllers/orderController.js
 const { query } = require('../config/db');
 
+function ensureArray(arr) {
+  return Array.isArray(arr) ? arr : [];
+}
+
 async function createOrder(req, res) {
+  const userId = req.user?.id;
+  const items = ensureArray(req.body?.items).map(i => ({
+    cupcake_id: Number(i.cupcake_id),
+    quantidade: Number(i.quantidade || 1),
+  }));
+  const payment_method = String(req.body?.payment_method || '').toLowerCase() === 'card' ? 'card' : 'pix';
+  const code = String(req.body?.code || '').trim();
+
+  if (!userId) return res.status(401).json({ message: 'Não autenticado' });
+  if (!items.length) return res.status(400).json({ message: 'Carrinho vazio' });
+
   try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ message: 'Não autenticado' });
-
-    const { items, payment_method, code } = req.body || {};
-    if (!Array.isArray(items) || !items.length) {
-      return res.status(400).json({ message: 'Itens do pedido ausentes' });
-    }
-    if (!payment_method || !['pix', 'card'].includes(payment_method)) {
-      return res.status(400).json({ message: 'Método de pagamento inválido' });
-    }
-    if (!code) return res.status(400).json({ message: 'Código do pedido ausente' });
-
-    let total = 0;
-    for (const it of items) {
-      const { cupcake_id, quantidade } = it;
-      const r = await query('SELECT preco_cents FROM cupcakes WHERE id=$1', [Number(cupcake_id)]);
-      if (!r.rowCount) return res.status(400).json({ message: `Cupcake ${cupcake_id} inválido` });
-      const price = Number(r.rows[0].preco_cents || 0);
-      total += price * Number(quantidade || 1);
-    }
-
-    const insOrder = await query(
-      `INSERT INTO orders (user_id, payment_method, code, total_cents)
-       VALUES ($1,$2,$3,$4) RETURNING id, user_id, payment_method, code, total_cents, created_at`,
-      [userId, payment_method, code, total]
+    const ids = items.map(i => i.cupcake_id);
+    const params = ids.map((_, idx) => `$${idx + 1}`).join(',');
+    const { rows: cupcakes } = await query(
+      `SELECT id, preco_cents FROM cupcakes WHERE id IN (${params})`,
+      ids
     );
+    const priceMap = new Map(cupcakes.map(c => [Number(c.id), Number(c.preco_cents || 0)]));
 
-    const orderId = insOrder.rows[0].id;
+    let total_cents = 0;
+    const normalized = items.map(i => {
+      const price = priceMap.get(i.cupcake_id) || 0;
+      total_cents += price * i.quantidade;
+      return { ...i, price_cents: price };
+    });
 
-    for (const it of items) {
-      const { cupcake_id, quantidade } = it;
-      const pr = await query('SELECT preco_cents FROM cupcakes WHERE id=$1', [Number(cupcake_id)]);
-      const price = Number(pr.rows[0].preco_cents || 0);
+    const { rows: orderRows } = await query(
+      `INSERT INTO orders (user_id, code, payment_method, total_cents)
+       VALUES ($1,$2,$3,$4)
+       RETURNING id, user_id, code, payment_method, total_cents, created_at`,
+      [userId, code || null, payment_method, total_cents]
+    );
+    const order = orderRows[0];
+
+    for (const it of normalized) {
       await query(
         `INSERT INTO order_items (order_id, cupcake_id, quantidade, price_cents)
          VALUES ($1,$2,$3,$4)`,
-        [orderId, Number(cupcake_id), Number(quantidade || 1), price]
+        [order.id, it.cupcake_id, it.quantidade, it.price_cents]
       );
     }
 
-    return res.status(201).json(insOrder.rows[0]);
-  } catch (e) {
+    return res.status(201).json({
+      id: order.id,
+      code: order.code,
+      payment_method: order.payment_method,
+      total_cents: Number(order.total_cents || 0),
+      created_at: order.created_at,
+    });
+  } catch (err) {
+    console.error('createOrder error:', err);
     return res.status(500).json({ message: 'Erro ao criar pedido' });
   }
 }
 
-async function listMyOrders(req, res) {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ message: 'Não autenticado' });
+async function getMyOrders(req, res) {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ message: 'Não autenticado' });
 
-    const orders = await query(
-      `SELECT id, payment_method, code, total_cents, created_at
-       FROM orders
-       WHERE user_id=$1
-       ORDER BY created_at DESC`,
+  try {
+    const { rows } = await query(
+      `
+      SELECT
+        o.id,
+        o.code,
+        o.payment_method,
+        o.total_cents,
+        o.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'cupcake_id', oi.cupcake_id,
+              'quantidade', oi.quantidade,
+              'price_cents', oi.price_cents,
+              'nome', c.nome,
+              'image_url', c.image_url
+            )
+            ORDER BY oi.id
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'::json
+        ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      LEFT JOIN cupcakes c ON c.id = oi.cupcake_id
+      WHERE o.user_id = $1
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+      `,
       [userId]
     );
 
-    if (!orders.rowCount) return res.json([]);
-
-    const ids = orders.rows.map(o => o.id);
-    const items = await query(
-      `SELECT
-         oi.order_id,
-         oi.cupcake_id,
-         oi.quantidade,
-         oi.price_cents,
-         c.nome AS cupcake_nome,
-         c.image_url
-       FROM order_items oi
-       JOIN cupcakes c ON c.id = oi.cupcake_id
-       WHERE oi.order_id = ANY($1::int[])
-       ORDER BY oi.order_id DESC`,
-      [ids]
-    );
-
-    const byOrder = {};
-    for (const row of items.rows) {
-      if (!byOrder[row.order_id]) byOrder[row.order_id] = [];
-      byOrder[row.order_id].push({
-        cupcake_id: row.cupcake_id,
-        nome: row.cupcake_nome,
-        image_url: row.image_url,
-        quantidade: Number(row.quantidade),
-        price_cents: Number(row.price_cents)
-      });
-    }
-
-    const payload = orders.rows.map(o => ({
-      id: o.id,
-      payment_method: o.payment_method,
-      code: o.code,
-      total_cents: Number(o.total_cents),
-      created_at: o.created_at,
-      items: byOrder[o.id] || []
-    }));
-
-    return res.json(payload);
-  } catch (e) {
-    return res.status(500).json({ message: 'Erro ao listar pedidos' });
+    return res.json(rows.map(r => ({
+      id: r.id,
+      code: r.code,
+      payment_method: r.payment_method,
+      total_cents: Number(r.total_cents || 0),
+      created_at: r.created_at,
+      items: Array.isArray(r.items) ? r.items : [],
+    })));
+  } catch (err) {
+    console.error('getMyOrders error:', err);
+    return res.status(500).json({ message: 'Erro ao carregar pedidos' });
   }
 }
 
-module.exports = { createOrder, listMyOrders };
+module.exports = { createOrder, getMyOrders };
