@@ -22,9 +22,9 @@ async function createOrder(req, res) {
 
   try {
     const ids = items.map(i => i.cupcake_id);
-    const params = ids.map((_, i) => `$${i + 1}`).join(',');
+    const ph = ids.map((_, i) => `$${i + 1}`).join(',');
     const { rows: cup } = await query(
-      `SELECT id, preco_cents FROM cupcakes WHERE id IN (${params})`,
+      `SELECT id, preco_cents FROM cupcakes WHERE id IN (${ph})`,
       ids
     );
 
@@ -78,29 +78,32 @@ async function getMyOrders(req, res) {
       [userId]
     );
 
-    const orderIds = orders.map(o => o.id);
-    let itemsByOrder = {};
-    if (orderIds.length > 0) {
-      const { rows: items } = await query(
-        `SELECT oi.order_id, oi.cupcake_id, oi.quantidade,
-                c.nome, c.image_url, c.preco_cents
-         FROM order_items oi
-         JOIN cupcakes c ON c.id = oi.cupcake_id
-         WHERE oi.order_id = ANY($1::int[])
-         ORDER BY oi.id`,
-        [orderIds]
-      );
-      itemsByOrder = items.reduce((acc, it) => {
-        (acc[it.order_id] = acc[it.order_id] || []).push({
-          cupcake_id: it.cupcake_id,
-          quantidade: it.quantidade,
-          nome: it.nome,
-          image_url: it.image_url,
-          price_cents: it.preco_cents
-        });
-        return acc;
-      }, {});
+    if (!orders.length) {
+      return res.json([]);
     }
+
+    const orderIds = orders.map(o => o.id);
+    const ph = orderIds.map((_, i) => `$${i + 1}`).join(',');
+    const { rows: items } = await query(
+      `SELECT oi.order_id, oi.cupcake_id, oi.quantidade,
+              c.nome, c.image_url, c.preco_cents
+       FROM order_items oi
+       JOIN cupcakes c ON c.id = oi.cupcake_id
+       WHERE oi.order_id IN (${ph})
+       ORDER BY oi.id`,
+      orderIds
+    );
+
+    const itemsByOrder = items.reduce((acc, it) => {
+      (acc[it.order_id] = acc[it.order_id] || []).push({
+        cupcake_id: it.cupcake_id,
+        quantidade: it.quantidade,
+        nome: it.nome,
+        image_url: it.image_url,
+        price_cents: it.preco_cents
+      });
+      return acc;
+    }, {});
 
     const result = orders.map(o => ({
       id: o.id,
